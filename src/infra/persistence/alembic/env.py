@@ -1,15 +1,25 @@
+import sys
+from os.path import abspath, dirname
+
+sys.path.insert(0, abspath(dirname(dirname(dirname(__file__)))))
+
 import asyncio
 from logging.config import fileConfig
 
+from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from alembic import context
+from src.core.env_conf import pg_stg
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+current_dir = dirname(abspath(__file__))
+config.set_main_option("script_location", current_dir)
+config.set_main_option("sqlalchemy.url", pg_stg.db_url)
+
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -46,6 +56,8 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        compare_server_default=True,
+        compare_type=True,
     )
 
     with context.begin_transaction():
@@ -53,7 +65,12 @@ def run_migrations_offline() -> None:
 
 
 def do_run_migrations(connection: Connection) -> None:
-    context.configure(connection=connection, target_metadata=target_metadata)
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        compare_server_default=True,
+        compare_type=True,
+    )
 
     with context.begin_transaction():
         context.run_migrations()
