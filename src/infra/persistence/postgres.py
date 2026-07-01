@@ -63,7 +63,7 @@ class PostgresManager(StrictSlots):
             await self.ping()
 
             print(
-                f"CONNECTED, time: {(perf_counter() - start) * 1000}ms, pool=NullPool btw",
+                f"CONNECTED, time: {(perf_counter() - start) * 1000}ms, pool=NullPool",
                 flush=True,
             )
 
