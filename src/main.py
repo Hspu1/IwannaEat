@@ -1,8 +1,8 @@
 from fastapi import FastAPI
-from src.infra.persistence.postgres import PostgresManager
 
 from src.core.env_conf import pg_stg
 from src.core.lifespan import get_lifespan
+from src.infra.persistence.postgres import PostgresManager
 
 from .docs import static_docs_urls
 

@@ -13,7 +13,7 @@ def get_lifespan(pg_manager: PostgresManager):
     async def lifespan(app: FastAPI):
         try:
             await safe_start(
-                service_name="PostgreSQL", coro=pg_manager.connect(), timeout=10.0
+                service_name="PostgreSQL", coro=pg_manager.connect(), atimeout=10.0
             )
         except Exception as e:
             await silent_close(service_name="PostgreSQL", coro=pg_manager.disconnect())
