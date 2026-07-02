@@ -17,7 +17,6 @@ from src.infra.persistence.models.schema import (
     DishesModel,
     DishIngredientsModel,
     IngredientsModel,
-    OrderItemsModel,
     OrdersModel,
     OutboxEventsModel,
     UsersModel,

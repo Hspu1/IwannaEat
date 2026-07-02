@@ -22,9 +22,3 @@ class OutboxEventType(IntEnum):
 
     WAREHOUSE_STOCK_DEPLETED = 9
     WAREHOUSE_RESTOCKED = 10
-
-
-class OutboxEventStatus(IntEnum):
-    PENDING = 1
-    COMPLETED = 2
-    FAILED = 3

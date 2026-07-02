@@ -1,3 +1,4 @@
+# activate uv w/ .venv\Scripts\activate (am OOM tho)
 [project]
 name = "IwannaEat"
 version = "0.1.0"
@@ -47,25 +48,24 @@ lint.select = [
 known-first-party = ["IwannaEat"]  # name of the project
 
 [tool.ruff.format]
-quote-style = "double"  # двойные кавычки вместо одинарных
-indent-style = "space"  # пробелы вместо табов
-# Автоматическое определение переносов строк
-line-ending = "auto"  # автоматически определяет LF (Unix) или CRLF (Windows)
+quote-style = "double"  # "" instead ''
+indent-style = "space"  # spaces instead of tabs
+line-ending = "auto"  # auto detect LF (Unix) or CRLF (Windows)
 
 [tool.ruff.lint.flake8-quotes]
-# Везде двойные кавычки
+# "" everywhere allez
 avoid-escape = true
 docstring-quotes = "double"
 
 [tool.ruff.lint.per-file-ignores]
 "alembic/versions/*.py" = [
-    "F401",  # unused import - в миграциях много неиспользуемых импортов
-    "E402",  # module import not at top of file - миграции нарушают этот порядок
-    "N802",  # function name should be lowercase - в миграциях camelCase
-    "N806",  # variable in function should be lowercase - имена таблиц в UPPERCASE
+    "F401",  # unused import
+    "E402",  # module import not at top of file
+    "N802",  # function name should be lowercase
+    "N806",  # variable in function should be lowercase
 ]
 "tests/*.py" = [
-    "S101",    # use of assert - в тестах assert нормально
-    "PLR2004", # magic value - в тестах много "магических" значений
-    "ARG001",  # unused argument - в фикстурах аргументы могут не использоваться
+    "S101",    # use of assert
+    "PLR2004", # magic value
+    "ARG001",  # unused argument
 ]
