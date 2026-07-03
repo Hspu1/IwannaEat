@@ -5,6 +5,7 @@ from src.core.lifespan import get_lifespan
 from src.shared.postgres.manager import PostgresManager
 
 from .docs import static_docs_urls
+from .modules import modules_router
 
 
 def create_app() -> FastAPI:
@@ -18,7 +19,12 @@ def create_app() -> FastAPI:
     )
     static_docs_urls(app=app)
 
+    app.include_router(modules_router)
+
     return app
 
 
 app = create_app()
+
+# run locally w/
+# uv run --group dev uvicorn src.main:app --host 127.0.0.1 --port 67 --workers 1

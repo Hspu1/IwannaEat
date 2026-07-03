@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
-from sqlalchemy.pool import NullPool
+from sqlalchemy.pool import NullPool  # noqa
 
 from src.core.base import StrictSlots
 from src.core.env_conf import PostgresSettings
@@ -45,14 +45,15 @@ class PostgresManager(StrictSlots):
         try:
             start = perf_counter()
             self._engine = create_async_engine(
-                url=self._cfg.pgbouncer_url,
+                # url=self._cfg.pgbouncer_url,
+                url=self._cfg.postgres_url,
                 json_serializer=orjson_dumps,
                 json_deserializer=orjson_loads,
-                poolclass=NullPool,
-                connect_args={
-                    "statement_cache_size": 0,
-                    "prepared_statement_cache_size": 0,
-                },
+                # poolclass=NullPool,
+                # connect_args={
+                #     "statement_cache_size": 0,
+                #     "prepared_statement_cache_size": 0,
+                # },
             )
             self._session_maker = async_sessionmaker(
                 bind=self._engine,
@@ -62,8 +63,14 @@ class PostgresManager(StrictSlots):
             )
             await self.ping()
 
+            pool_name = (
+                "NullPool"
+                if self._engine.pool.__class__.__name__ == "NullPool"
+                else "QueuePool"
+            )
             print(
-                f"CONNECTED, time: {(perf_counter() - start) * 1000}ms, pool=NullPool",
+                f"CONNECTED, database initialized in {
+                    (perf_counter() - start) * 1000:.2f}ms, pool={pool_name}",
                 flush=True,
             )
 

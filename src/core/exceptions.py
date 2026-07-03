@@ -12,3 +12,10 @@ class SafeStartError(BaseAppError):
 
 class PostgresNotReachableError(BaseAppError):
     message: str = "Postgres isn't reachable/initialized"
+
+
+class WhyFuckingRaceConditionError(BaseAppError):
+    message: str = """
+        RACE CONDITION on REGISTRATION;
+        Are yall kiding me?! UUIDv7 must be UNIQUE, how ts even possible?!
+    """

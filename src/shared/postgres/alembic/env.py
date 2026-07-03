@@ -29,7 +29,7 @@ from src.shared.postgres.models.schema import (
 config = context.config
 current_dir = dirname(abspath(__file__))
 config.set_main_option("script_location", current_dir)
-config.set_main_option("sqlalchemy.url", pg_stg.db_url)
+config.set_main_option("sqlalchemy.url", pg_stg.postgres_url)
 
 
 # Interpret the config file for Python logging.

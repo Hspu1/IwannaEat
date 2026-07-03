@@ -1,10 +1,8 @@
-from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import (
     BIGINT,
     Boolean,
-    DateTime,
     ForeignKey,
     Index,
     Integer,
@@ -25,23 +23,6 @@ from .mixins import TimestampMixin, UUIDv7Mixin
 class UsersModel(Base, UUIDv7Mixin):
     __tablename__ = "users"
 
-    email_verification_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True, sort_order=1
-    )
-    email: Mapped[str] = mapped_column(String(254), nullable=False, sort_order=2)
-    is_deleted: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, sort_order=3
-    )
-
-    __table_args__ = (
-        Index(
-            "uq_users_user_active",
-            "email",
-            unique=True,
-            postgresql_where=text("is_deleted IS FALSE"),
-        ),
-    )
-
 
 class WalletsModel(Base):
     # !!! SET FILLFACTOR IN ALEMBIC SCRIPTS !!! --> 76%
@@ -58,9 +39,6 @@ class WalletsModel(Base):
     )
     cashback_balance: Mapped[int] = mapped_column(
         BIGINT, nullable=False, default=0, server_default=text("0"), sort_order=3
-    )
-    is_frozen: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, sort_order=4
     )
 
 

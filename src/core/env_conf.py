@@ -12,7 +12,7 @@ CFG = SettingsConfigDict(env_file=ENV_FILE, env_file_encoding="utf-8", extra="ig
 class PostgresSettings(BaseSettings):
     model_config = CFG
 
-    db_url: Annotated[PostgresDsn, AfterValidator(str)]
+    postgres_url: Annotated[PostgresDsn, AfterValidator(str)]
     pgbouncer_url: Annotated[PostgresDsn, AfterValidator(str)]
 
 

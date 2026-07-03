@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: 5f1c562efac8
+Revision ID: b87293b62f29
 Revises:
-Create Date: 2026-07-02 19:55:28.960694
+Create Date: 2026-07-03 20:26:22.311642
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '5f1c562efac8'
+revision: str = 'b87293b62f29'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -30,10 +30,10 @@ def upgrade() -> None:
     )
     op.create_index('uq_dishes_name_lowercase', 'dishes', [sa.literal_column('lower(name)')], unique=True, postgresql_where=sa.text('is_available IS TRUE'))
     op.create_table('ingredients',
-            sa.Column('id', sa.Uuid(), nullable=False),
-            sa.Column('name', sa.String(length=50), nullable=False),
-            sa.Column('is_available', sa.Boolean(), nullable=False),
-            sa.PrimaryKeyConstraint('id')
+        sa.Column('id', sa.Uuid(), nullable=False),
+        sa.Column('name', sa.String(length=50), nullable=False),
+        sa.Column('is_available', sa.Boolean(), nullable=False),
+        sa.PrimaryKeyConstraint('id')
     )
     op.create_index('uq_ingredients_name_lowercase', 'ingredients', [sa.literal_column('lower(name)')], unique=True, postgresql_where=sa.text('is_available IS TRUE'))
     op.create_table('outbox_events',
@@ -45,12 +45,8 @@ def upgrade() -> None:
     )
     op.create_table('users',
             sa.Column('id', sa.Uuid(), nullable=False),
-            sa.Column('email_verification_at', sa.DateTime(timezone=True), nullable=True),
-            sa.Column('email', sa.String(length=254), nullable=False),
-            sa.Column('is_deleted', sa.Boolean(), nullable=False),
             sa.PrimaryKeyConstraint('id')
     )
-    op.create_index('uq_users_user_active', 'users', ['email'], unique=True, postgresql_where=sa.text('is_deleted IS FALSE'))
     op.create_table('dish_ingredients',
             sa.Column('dish_id', sa.Uuid(), nullable=False),
             sa.Column('ingredient_id', sa.Uuid(), nullable=False),
@@ -74,7 +70,6 @@ def upgrade() -> None:
             sa.Column('user_id', sa.Uuid(), nullable=False),
             sa.Column('balance', sa.BIGINT(), server_default=sa.text('0'), nullable=False),
             sa.Column('cashback_balance', sa.BIGINT(), server_default=sa.text('0'), nullable=False),
-            sa.Column('is_frozen', sa.Boolean(), nullable=False),
             sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='RESTRICT'),
             sa.PrimaryKeyConstraint('user_id')
     )
@@ -98,7 +93,6 @@ def downgrade() -> None:
     op.drop_table('orders')
     op.drop_index('idx_dish_ingredient', table_name='dish_ingredients')
     op.drop_table('dish_ingredients')
-    op.drop_index('uq_users_user_active', table_name='users', postgresql_where=sa.text('is_deleted IS FALSE'))
     op.drop_table('users')
     op.drop_table('outbox_events')
     op.drop_index('uq_ingredients_name_lowercase', table_name='ingredients', postgresql_where=sa.text('is_available IS TRUE'))
