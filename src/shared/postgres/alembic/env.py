@@ -12,8 +12,8 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from src.core.env_conf import pg_stg
-from src.infra.persistence.base import Base
-from src.infra.persistence.models.schema import (
+from src.shared.postgres.base import Base
+from src.shared.postgres.models.schema import (
     DishesModel,
     DishIngredientsModel,
     IngredientsModel,

@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from src.infra.persistence.postgres import PostgresManager
+from src.shared.postgres.manager import PostgresManager
 
 from .exceptions import SafeStartError
 from .lifespan_helpers import safe_start, silent_close
