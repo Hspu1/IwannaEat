@@ -7,11 +7,11 @@ class BaseAppError(Exception):
 
 
 class SafeStartError(BaseAppError):
-    message: str = "Application failed to start -> infrastructure is down"
+    message: str = "Application failed to start --> infrastructure is down"
 
 
 class PostgresNotReachableError(BaseAppError):
-    message: str = "Postgres isn't reachable/initialized"
+    message: str = "PostgreSQL isn't reachable/initialized"
 
 
 class WhyFuckingRaceConditionError(BaseAppError):

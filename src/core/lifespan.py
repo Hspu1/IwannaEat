@@ -17,7 +17,9 @@ def get_lifespan(pg_manager: PostgresManager):
             )
         except Exception as e:
             await silent_close(service_name="PostgreSQL", coro=pg_manager.disconnect())
-            raise SafeStartError(message="App startup failed due to DB error") from e
+            raise SafeStartError(
+                message="App startup failed due to PostgreSQL error"
+            ) from e
 
         app.state.pg_manager = pg_manager
 
