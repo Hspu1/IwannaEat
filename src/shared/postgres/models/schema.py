@@ -12,7 +12,7 @@ from sqlalchemy import (
     func,
     text,
 )
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import JSON, JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from ..base import Base
@@ -26,6 +26,7 @@ class UsersModel(Base, UUIDv7Mixin):
 
 class WalletsModel(Base):
     # !!! SET FILLFACTOR IN ALEMBIC SCRIPTS !!! --> 76%
+    # op.execute("ALTER TABLE wallets SET (fillfactor = 76)")
     __tablename__ = "wallets"
 
     user_id: Mapped[UUID] = mapped_column(
@@ -45,8 +46,7 @@ class WalletsModel(Base):
 class DishesModel(Base, UUIDv7Mixin):
     __tablename__ = "dishes"
 
-    price: Mapped[int] = mapped_column(Integer, nullable=False, sort_order=1)
-    name: Mapped[str] = mapped_column(String(50), nullable=False, sort_order=2)
+    info: Mapped[dict] = mapped_column(JSONB, nullable=False, sort_order=2)
     is_available: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=True, sort_order=3
     )
@@ -54,9 +54,17 @@ class DishesModel(Base, UUIDv7Mixin):
     __table_args__ = (
         Index(
             "uq_dishes_name_lowercase",
-            func.lower(name),
+            func.lower(info["name"].as_string()),
             unique=True,
-            postgresql_where=text("is_available IS TRUE"),
+            postgresql_where=is_available.is_(True),
+        ),
+        Index(
+            "idx_dishes_info_path_gin",
+            info,
+            postgresql_using="gin",
+            postgresql_ops={"info": "jsonb_path_ops"},
+            postgresql_where=is_available.is_(True),
+            postgresql_with={"fastupdate": False},
         ),
     )
 
@@ -102,6 +110,7 @@ class DishIngredientsModel(Base):
 
 class WarehouseModel(Base):
     # !!! SET FILLFACTOR IN ALEMBIC SCRIPTS !!! --> 67%
+    # op.execute("ALTER TABLE warehouse SET (fillfactor = 67)")
     __tablename__ = "warehouse"
 
     ingredient_id: Mapped[UUID] = mapped_column(
@@ -120,16 +129,16 @@ class OrdersModel(Base, TimestampMixin, UUIDv7Mixin):
         Uuid, ForeignKey("users.id", ondelete="RESTRICT"), nullable=False, sort_order=1
     )
     total_price: Mapped[int] = mapped_column(BIGINT, nullable=False, sort_order=2)
+    items: Mapped[dict] = mapped_column(JSONB, nullable=False, sort_order=3)
     status: Mapped[OrderStatus] = mapped_column(
-        SmallInteger, nullable=False, sort_order=3
+        SmallInteger, nullable=False, sort_order=4
     )
-    items: Mapped[dict] = mapped_column(JSONB, nullable=False)
 
     __table_args__ = (
         Index(
             "idx_orders_user_active",
-            "user_id",
-            postgresql_where=text("status IN (1, 2, 3)"),
+            user_id,
+            postgresql_where=status.in_([1, 2, 3]),
             # 1 --> CREATED && 2 --> COOKING && 3 --> DELIVERING
         ),
     )
@@ -142,4 +151,4 @@ class OutboxEventsModel(Base, TimestampMixin):
     event_type: Mapped[OutboxEventType] = mapped_column(
         SmallInteger, nullable=False, sort_order=1
     )
-    payload: Mapped[dict] = mapped_column(JSONB, nullable=False, sort_order=3)
+    payload: Mapped[dict] = mapped_column(JSON, nullable=False, sort_order=3)
