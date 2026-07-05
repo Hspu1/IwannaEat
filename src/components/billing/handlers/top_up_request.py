@@ -2,7 +2,7 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .repository import create_top_up_request
+from ..repository.create_top_up_request import create_top_up_request
 
 
 async def top_up_request(session: AsyncSession, user_id: UUID, amount: int) -> str:
