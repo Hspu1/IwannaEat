@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 from src.core.dependencies import PgSession
 
-from .usecases import top_up_balance
+from .handlers import top_up_balance
 
 billing_router = APIRouter(prefix="/billing")
 

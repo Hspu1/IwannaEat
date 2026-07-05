@@ -2,7 +2,7 @@ from fastapi import APIRouter, status
 
 from src.core.dependencies import PgSession
 
-from .usecases import register_new_user
+from .handlers import register_new_user
 
 identity_router = APIRouter(prefix="/identity")
 

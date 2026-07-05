@@ -5,10 +5,10 @@ from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.exceptions import WalletBalanceOverflowError, WalletNotFoundError
-from src.shared.postgres.models.schema import WalletsModel
+from src.shared.postgres.schema import WalletsModel
 
 
-async def top_up_balance(session: AsyncSession, user_id: UUID, amount: int) -> int:
+async def update_balance(session: AsyncSession, user_id: UUID, amount: int) -> int:
     try:
         result = await session.execute(
             update(WalletsModel)
@@ -21,7 +21,14 @@ async def top_up_balance(session: AsyncSession, user_id: UUID, amount: int) -> i
         if new_balance is None:
             raise WalletNotFoundError(user_id=user_id)
 
-        return int(new_balance)
+        return new_balance
 
     except DBAPIError as e:
-        raise WalletBalanceOverflowError(user_id=user_id) from e
+        overflow_markers = (
+            "value out of int64 range",  # asyncpg.exceptions.DataError
+            "bigint out of range",  # asyncpg.exceptions.NumericValueOutOfRangeError
+        )
+        if any(marker in str(e.orig) for marker in overflow_markers):
+            raise WalletBalanceOverflowError(user_id=user_id) from e
+
+        raise e
