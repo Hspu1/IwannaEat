@@ -4,8 +4,8 @@ from src.core.env_conf import pg_stg
 from src.core.lifespan import get_lifespan
 from src.shared.postgres.manager import PostgresManager
 
+from .components import components_router
 from .docs import static_docs_urls
-from .modules import modules_router
 
 
 def create_app() -> FastAPI:
@@ -19,7 +19,7 @@ def create_app() -> FastAPI:
     )
     static_docs_urls(app=app)
 
-    app.include_router(modules_router)
+    app.include_router(components_router)
 
     return app
 

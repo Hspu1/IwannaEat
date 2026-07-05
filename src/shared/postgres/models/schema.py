@@ -141,7 +141,7 @@ class OrdersModel(Base, TimestampMixin, UUIDv7Mixin):
             "idx_orders_user_active",
             user_id,
             postgresql_where=status.in_([1, 2, 3]),
-            # 1 --> CREATED && 2 --> COOKING && 3 --> DELIVERING
+            # 1 --> CREATED; 2 --> COOKING; 3 --> DELIVERING
         ),
     )
 
