@@ -21,20 +21,16 @@ class TopUpRequest(BaseModel):
     amount: int = Field(ge=5000, description="Amount in minor units (789.99 --> 78999)")
 
 
-class TopUpResponse(BaseModel):
-    top_up_id: UUID
-
-
 #######################################################################################
 #######################################################################################
 
 
 @router.post("/top-up", status_code=status.HTTP_200_OK)
-async def create_request(session: PgSession, request: TopUpRequest) -> TopUpResponse:
+async def create_request(session: PgSession, request: TopUpRequest) -> UUID:
     top_up_id = await create_top_up_transaction(
         session=session, user_id=request.user_id, amount=request.amount
     )
-    return TopUpResponse(top_up_id=top_up_id)
+    return top_up_id
 
 
 #######################################################################################

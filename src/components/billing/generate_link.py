@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from fastapi import APIRouter, status
+from pydantic import HttpUrl
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from stripe import StripeClient, error
@@ -21,7 +22,7 @@ async def generate_link(
     session: PgRoSession,
     stripe_client: StripeClientDep,
     top_up_id: UUID,
-) -> str:
+) -> HttpUrl:
 
     amount, user_id = await get_top_up_info(session=session, top_up_id=top_up_id)
     try:
@@ -51,7 +52,7 @@ async def create_stripe_checkout_session(  # noqa: PLR0913
     user_id: UUID,
     success_url: str,
     cancel_url: str,
-) -> str:
+) -> HttpUrl:
 
     checkout_session = await stripe_client.checkout.sessions.create_async(
         params={
