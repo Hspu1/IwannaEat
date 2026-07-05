@@ -1,11 +1,25 @@
 from uuid import UUID
 
+from fastapi import APIRouter, status
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.core.dependencies import PgSession
 from src.core.exceptions import RaceConditionCreatingWalletError
 from src.shared.postgres.schema import UsersModel, WalletsModel
+
+router = APIRouter(prefix="/identity", tags=["identity"])
+
+
+@router.post("", status_code=status.HTTP_201_CREATED)
+async def register(session: PgSession) -> str:
+    user_id: UUID = await create_user_with_wallet(session=session)
+    return str(user_id)
+
+
+#######################################################################################
+#######################################################################################
 
 
 async def create_user_with_wallet(session: AsyncSession) -> UUID:
