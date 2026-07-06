@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 
-from . import register
+from .register import router as register
 
 identity_router = APIRouter()
-identity_router.include_router(register.router)
+identity_router.include_router(register)
 
 __all__ = ("identity_router",)
