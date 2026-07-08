@@ -90,7 +90,5 @@ async def create_topup_request(
 
     result = await session.execute(stmt_outbox)
 
-    print(f"rowsount acshually: {result.rowcount}", flush=True)
-
     if result.rowcount == 0:
         raise Exception
