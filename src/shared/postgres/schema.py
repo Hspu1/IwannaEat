@@ -37,23 +37,51 @@ class WalletTopUpsModel(Base, TimestampMixin, UUIDv7Mixin):
         nullable=False,
         sort_order=1,
     )
+    idempotency_key: Mapped[UUID] = mapped_column(
+        Uuid, nullable=False, sort_order=2
+    )  # !!! from the client !!!
     amount: Mapped[int] = mapped_column(
-        BIGINT, nullable=False, sort_order=2
+        BIGINT, nullable=False, sort_order=3
     )  # minor units
     status: Mapped[TopUpStatus] = mapped_column(
         SmallInteger,
         nullable=False,
         default=1,
         server_default=text("1"),
-        sort_order=3,
+        sort_order=4,
     )  # 1 --> PENDING; 2 --> SUCCEEDED; 3 --> FAILED
 
     __table_args__ = (
+        Index(
+            "uq_wallet_top_ups_idempotency",
+            "idempotency_key",
+            unique=True,
+        ),
         Index(
             "idx_wallet_top_ups_cleanup",
             "id",
             postgresql_where=(status == 1),
         ),  # speeds up cron cleanup for abandoned pendings
+    )
+
+
+class UserCardsModel(Base):
+    __tablename__ = "user_cards"
+
+    user_id: Mapped[UUID] = mapped_column(
+        Uuid,
+        ForeignKey("users.id", ondelete="RESTRICT"),
+        primary_key=True,
+        sort_order=1,
+    )
+    seti_id: Mapped[str] = mapped_column(String(29), nullable=False, sort_order=2)
+
+    __table_args__ = (
+        Index(
+            "uq_user_cards_seti_id",
+            "seti_id",
+            unique=True,
+        ),
     )
 
 
@@ -74,7 +102,6 @@ class WalletsModel(Base):
     cashback_balance: Mapped[int] = mapped_column(
         BIGINT, nullable=False, default=0, server_default=text("0"), sort_order=3
     )  # minor units
-    seti_id: Mapped[str] = mapped_column(String(29), nullable=True, sort_order=4)
 
 
 class DishesModel(Base, UUIDv7Mixin):
@@ -187,8 +214,8 @@ class OrdersModel(Base, TimestampMixin, UUIDv7Mixin):
             "idx_orders_user_active",
             user_id,
             postgresql_where=status.in_([1, 2, 3]),
-            # 2 --> COOKING; 3 --> DELIVERING ЧЕ ЕЩЕ ИНДЕКСИРОВАТЬ HAX?
-        ),  # A ЕЩЕ ENUMS ИЗБЫТОЧНЫЕ
+            # 1 --> CREATED; 2 --> COOKING; 3 --> DELIVERING
+        ),
     )
 
 

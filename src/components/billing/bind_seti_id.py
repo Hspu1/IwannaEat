@@ -2,11 +2,12 @@ from uuid import UUID
 
 from fastapi import APIRouter, status
 from pydantic import BaseModel, Field
-from sqlalchemy import update
+from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.dependencies import PgSession
-from src.shared.postgres.schema import WalletsModel
+from src.shared.postgres.schema import UserCardsModel
 
 router = APIRouter(prefix="/bind")
 
@@ -40,12 +41,9 @@ async def bind_setup_intent(session: PgSession, request: BindRequest) -> dict[st
 
 
 async def bind_seti_id(session: AsyncSession, user_id: UUID, seti_id: str) -> None:
-    stmt = (
-        update(WalletsModel)
-        .where(
-            WalletsModel.user_id == user_id,
-            WalletsModel.seti_id.is_(None),
-        )
-        .values(seti_id=seti_id)
-    )
-    await session.execute(stmt)
+    try:
+        stmt = insert(UserCardsModel).values(user_id=user_id, seti_id=seti_id)
+        await session.execute(stmt)
+
+    except IntegrityError as err:
+        raise err

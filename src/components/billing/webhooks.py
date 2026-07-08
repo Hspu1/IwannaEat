@@ -22,7 +22,9 @@ async def stripe_webhook(
 ) -> dict[str, str]:
 
     if not stripe_signature:
-        return {"status": "bad_signature"}
+        return {
+            "status": "bad_signature",
+        }
 
     payload = await request.body()
     try:
@@ -32,10 +34,14 @@ async def stripe_webhook(
             secret=stripe_stg.stripe_webhook_secret,
         )
     except Exception:
-        return {"status": "bad_signature"}
+        return {
+            "status": "bad_signature",
+        }
 
     if event["type"] != "checkout.session.completed":
-        return {"status": "ignored_event_type"}
+        return {
+            "status": "ignored_event_type",
+        }
 
     session_data = event["data"]["object"]
     metadata = session_data["metadata"]
@@ -44,14 +50,18 @@ async def stripe_webhook(
     amount = session_data["amount_total"]
 
     if not top_up_id_raw or not user_id_raw or amount is None:
-        return {"status": "missing_metadata_fields"}
+        return {
+            "status": "missing_metadata_fields",
+        }
 
     try:
         top_up_id = UUID(top_up_id_raw)
         user_id = UUID(user_id_raw)
 
     except ValueError:
-        return {"status": "invalid_uuid_format"}
+        return {
+            "status": "invalid_uuid_format",
+        }
 
     return await i_am_gay(
         session=session, top_up_id=top_up_id, user_id=user_id, amount=amount
@@ -75,10 +85,14 @@ async def i_am_gay(
     top_up_status = result.scalar_one_or_none()
 
     if top_up_status is None:
-        return {"status": "not_found"}
+        return {
+            "status": "not_found",
+        }
 
     if top_up_status != TopUpStatus.PENDING:
-        return {"status": "already_processed"}
+        return {
+            "status": "already_processed",
+        }
 
     await session.execute(
         update(WalletTopUpsModel)
@@ -95,8 +109,10 @@ async def i_am_gay(
 
     except DBAPIError as e:
         overflow_markers = (
-            # "value out of int64 range",  # asyncpg.exceptions.DataError  FOR WHAT
-            # FOR WHATFOR WHATFOR WHATFOR WHATFOR WHATFOR WHATFOR WHATFOR WHAT
+            # "value out of int64 range",  # asyncpg.exceptions.DataError    FOR WHAT
+            # FOR WHAT FOR WHAT FOR WHAT FOR WHAT FOR WHAT FOR WHAT FOR WHAT FOR WHAT
+            # FOR WHAT FOR WHAT FOR WHAT FOR WHAT FOR WHAT FOR WHAT FOR WHAT FOR WHAT
+            # FOR WHAT FOR WHAT FOR WHAT FOR WHAT FOR WHAT FOR WHAT FOR WHAT FOR WHAT
             "bigint out of range",  # asyncpg.exceptions.NumericValueOutOfRangeError
         )
         if any(marker in str(e.orig) for marker in overflow_markers):
@@ -104,4 +120,6 @@ async def i_am_gay(
 
         raise e
 
-    return {"status": "success"}
+    return {
+        "status": "success",
+    }
