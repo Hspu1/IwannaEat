@@ -9,6 +9,7 @@ from sqlalchemy import (
     Integer,
     SmallInteger,
     String,
+    UniqueConstraint,
     Uuid,
     and_,
     func,
@@ -21,6 +22,10 @@ from .base import Base
 from .enums import OrderStatus, OutboxEventType, TopUpStatus
 from .mixins import TimestampMixin, UUIDv7Mixin
 
+# op.execute("ALTER TABLE wallet_top_ups SET (fillfactor = 88)")
+# op.execute("ALTER TABLE wallets SET (fillfactor = 76)")
+# op.execute("ALTER TABLE warehouse SET (fillfactor = 67)")
+
 
 class UsersModel(Base, UUIDv7Mixin):
     __tablename__ = "users"
@@ -28,7 +33,6 @@ class UsersModel(Base, UUIDv7Mixin):
 
 class WalletTopUpsModel(Base, TimestampMixin, UUIDv7Mixin):
     # !!! SET FILLFACTOR IN ALEMBIC SCRIPTS !!! --> 88%
-    # op.execute("ALTER TABLE wallet_top_ups SET (fillfactor = 88)")
     __tablename__ = "wallet_top_ups"
 
     user_id: Mapped[UUID] = mapped_column(
@@ -52,42 +56,35 @@ class WalletTopUpsModel(Base, TimestampMixin, UUIDv7Mixin):
     )  # 1 --> PENDING; 2 --> SUCCEEDED; 3 --> FAILED
 
     __table_args__ = (
-        Index(
-            "uq_wallet_top_ups_idempotency",
-            "idempotency_key",
-            unique=True,
+        UniqueConstraint(
+            user_id, idempotency_key, name="uq_wallet_top_ups_user_idempotency"
         ),
         Index(
             "idx_wallet_top_ups_cleanup",
-            "id",
+            "created_at",
             postgresql_where=(status == 1),
         ),  # speeds up cron cleanup for abandoned pendings
     )
 
 
-class UserCardsModel(Base):
+class UserCardsModel(Base, UUIDv7Mixin):
     __tablename__ = "user_cards"
 
     user_id: Mapped[UUID] = mapped_column(
         Uuid,
         ForeignKey("users.id", ondelete="RESTRICT"),
-        primary_key=True,
         sort_order=1,
     )
     seti_id: Mapped[str] = mapped_column(String(29), nullable=False, sort_order=2)
 
     __table_args__ = (
-        Index(
-            "uq_user_cards_seti_id",
-            "seti_id",
-            unique=True,
-        ),
+        Index("uq_user_cards_user_id", user_id, unique=True),
+        Index("uq_user_cards_seti_id", seti_id, unique=True),
     )
 
 
 class WalletsModel(Base):
     # !!! SET FILLFACTOR IN ALEMBIC SCRIPTS !!! --> 76%
-    # op.execute("ALTER TABLE wallets SET (fillfactor = 76)")
     __tablename__ = "wallets"
 
     user_id: Mapped[UUID] = mapped_column(
@@ -125,20 +122,14 @@ class DishesModel(Base, UUIDv7Mixin):
             "uq_dishes_name_lowercase",
             func.lower(info["name"].as_string()),
             unique=True,
-            postgresql_where=and_(
-                is_available.is_(True),
-                info["name"].as_string().is_not(None),
-            ),
+            postgresql_where=and_(is_available.is_(True)),
         ),
         Index(
             "idx_dishes_info_path_gin",
             info,
             postgresql_using="gin",
             postgresql_ops={"info": "jsonb_path_ops"},
-            postgresql_where=and_(
-                is_available.is_(True),
-                info["name"].as_string().is_not(None),
-            ),
+            postgresql_where=and_(is_available.is_(True)),
             postgresql_with={"fastupdate": False},
         ),
     )
@@ -178,14 +169,13 @@ class DishIngredientsModel(Base):
     __table_args__ = (
         Index(
             "idx_dish_ingredient",
-            "ingredient_id",
+            ingredient_id,
         ),
     )
 
 
 class WarehouseModel(Base):
     # !!! SET FILLFACTOR IN ALEMBIC SCRIPTS !!! --> 67%
-    # op.execute("ALTER TABLE warehouse SET (fillfactor = 67)")
     __tablename__ = "warehouse"
 
     ingredient_id: Mapped[UUID] = mapped_column(
@@ -226,4 +216,4 @@ class OutboxEventsModel(Base, TimestampMixin):
     event_type: Mapped[OutboxEventType] = mapped_column(
         SmallInteger, nullable=False, sort_order=1
     )
-    payload: Mapped[dict] = mapped_column(JSON, nullable=False, sort_order=3)
+    payload: Mapped[dict] = mapped_column(JSON, nullable=False, sort_order=2)

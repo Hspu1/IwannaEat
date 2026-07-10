@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: a174c05df398
+Revision ID: bae68d980a2b
 Revises:
-Create Date: 2026-07-08 23:05:07.442109
+Create Date: 2026-07-10 21:46:27.582845
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = 'a174c05df398'
+revision: str = 'bae68d980a2b'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -28,15 +28,25 @@ def upgrade() -> None:
             sa.CheckConstraint("info ? 'name'", name='chk_dishes_info_must_define_name'),
             sa.PrimaryKeyConstraint('id')
     )
-    op.create_index('idx_dishes_info_path_gin', 'dishes', ['info'], unique=False, postgresql_using='gin', postgresql_ops={'info': 'jsonb_path_ops'}, postgresql_where=sa.text("is_available IS true AND CAST((info ->> 'name') AS VARCHAR) IS NOT NULL"), postgresql_with={'fastupdate': False})
-    op.create_index('uq_dishes_name_lowercase', 'dishes', [sa.literal_column("lower(CAST(info ->> 'name' AS VARCHAR))")], unique=True, postgresql_where=sa.text("is_available IS true AND CAST((info ->> 'name') AS VARCHAR) IS NOT NULL"))
+    op.create_index(
+        'idx_dishes_info_path_gin', 'dishes', ['info'], unique=False,
+        postgresql_using='gin', postgresql_ops={'info': 'jsonb_path_ops'},
+        postgresql_where=sa.text('is_available IS true'), postgresql_with={'fastupdate': False}
+    )
+    op.create_index(
+        'uq_dishes_name_lowercase', 'dishes', [sa.literal_column("lower(CAST(info ->> 'name' AS VARCHAR))")], unique=True,
+        postgresql_where=sa.text('is_available IS true')
+    )
     op.create_table('ingredients',
             sa.Column('id', sa.Uuid(), nullable=False),
             sa.Column('name', sa.String(length=50), nullable=False),
             sa.Column('is_available', sa.Boolean(), nullable=False),
             sa.PrimaryKeyConstraint('id')
     )
-    op.create_index('uq_ingredients_name_lowercase', 'ingredients', [sa.literal_column('lower(name)')], unique=True, postgresql_where=sa.text('is_available IS true'))
+    op.create_index(
+        'uq_ingredients_name_lowercase', 'ingredients', [sa.literal_column('lower(name)')], unique=True,
+        postgresql_where=sa.text('is_available IS true')
+    )
     op.create_table('outbox_events',
             sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
             sa.Column('id', sa.BIGINT(), autoincrement=True, nullable=False),
@@ -66,14 +76,19 @@ def upgrade() -> None:
             sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='RESTRICT'),
             sa.PrimaryKeyConstraint('id')
     )
-    op.create_index('idx_orders_user_active', 'orders', ['user_id'], unique=False, postgresql_where=sa.text('status IN (1, 2, 3)'))
+    op.create_index(
+        'idx_orders_user_active', 'orders', ['user_id'], unique=False,
+        postgresql_where=sa.text('status IN (1, 2, 3)')
+    )
     op.create_table('user_cards',
+            sa.Column('id', sa.Uuid(), nullable=False),
             sa.Column('user_id', sa.Uuid(), nullable=False),
             sa.Column('seti_id', sa.String(length=29), nullable=False),
             sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='RESTRICT'),
-            sa.PrimaryKeyConstraint('user_id')
+            sa.PrimaryKeyConstraint('id')
     )
     op.create_index('uq_user_cards_seti_id', 'user_cards', ['seti_id'], unique=True)
+    op.create_index('uq_user_cards_user_id', 'user_cards', ['user_id'], unique=True)
     op.create_table('wallet_top_ups',
             sa.Column('id', sa.Uuid(), nullable=False),
             sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
@@ -82,10 +97,13 @@ def upgrade() -> None:
             sa.Column('amount', sa.BIGINT(), nullable=False),
             sa.Column('status', sa.SmallInteger(), server_default=sa.text('1'), nullable=False),
             sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='RESTRICT'),
-            sa.PrimaryKeyConstraint('id')
+            sa.PrimaryKeyConstraint('id'),
+            sa.UniqueConstraint('user_id', 'idempotency_key', name='uq_wallet_top_ups_user_idempotency')
     )
-    op.create_index('idx_wallet_top_ups_cleanup', 'wallet_top_ups', ['id'], unique=False, postgresql_where=sa.text('status = 1'))
-    op.create_index('uq_wallet_top_ups_idempotency', 'wallet_top_ups', ['idempotency_key'], unique=True)
+    op.create_index(
+        'idx_wallet_top_ups_cleanup', 'wallet_top_ups', ['created_at'], unique=False,
+        postgresql_where=sa.text('status = 1')
+    )
     op.execute("ALTER TABLE wallet_top_ups SET (fillfactor = 88)")
     op.create_table('wallets',
             sa.Column('user_id', sa.Uuid(), nullable=False),
@@ -110,9 +128,9 @@ def downgrade() -> None:
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_table('warehouse')
     op.drop_table('wallets')
-    op.drop_index('uq_wallet_top_ups_idempotency', table_name='wallet_top_ups')
     op.drop_index('idx_wallet_top_ups_cleanup', table_name='wallet_top_ups', postgresql_where=sa.text('status = 1'))
     op.drop_table('wallet_top_ups')
+    op.drop_index('uq_user_cards_user_id', table_name='user_cards')
     op.drop_index('uq_user_cards_seti_id', table_name='user_cards')
     op.drop_table('user_cards')
     op.drop_index('idx_orders_user_active', table_name='orders', postgresql_where=sa.text('status IN (1, 2, 3)'))
@@ -123,7 +141,7 @@ def downgrade() -> None:
     op.drop_table('outbox_events')
     op.drop_index('uq_ingredients_name_lowercase', table_name='ingredients', postgresql_where=sa.text('is_available IS true'))
     op.drop_table('ingredients')
-    op.drop_index('uq_dishes_name_lowercase', table_name='dishes', postgresql_where=sa.text("is_available IS true AND CAST((info ->> 'name') AS VARCHAR) IS NOT NULL"))
-    op.drop_index('idx_dishes_info_path_gin', table_name='dishes', postgresql_using='gin', postgresql_ops={'info': 'jsonb_path_ops'}, postgresql_where=sa.text("is_available IS true AND CAST((info ->> 'name') AS VARCHAR) IS NOT NULL"), postgresql_with={'fastupdate': False})
+    op.drop_index('uq_dishes_name_lowercase', table_name='dishes', postgresql_where=sa.text('is_available IS true'))
+    op.drop_index('idx_dishes_info_path_gin', table_name='dishes', postgresql_using='gin', postgresql_ops={'info': 'jsonb_path_ops'}, postgresql_where=sa.text('is_available IS true'), postgresql_with={'fastupdate': False})
     op.drop_table('dishes')
     # ### end Alembic commands ###

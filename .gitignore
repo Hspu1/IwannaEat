@@ -41,18 +41,18 @@ dump.rdb
 logs/
 *.logs
 
-# tests
+# tests (who writes ts?)
 .coverage
 .coverage.*
 htmlcov/
 .pytest_cache/
 
-# IDE
+# IDE (who uses ts?)
 .idea/
 *.iml
 
 # local stuff
 .local
 
-# ghey
+# no ghey :/
 gay.py
