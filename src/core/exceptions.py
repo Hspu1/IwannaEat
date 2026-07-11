@@ -17,10 +17,6 @@ class PostgresNotReachableError(BaseAppError):
     default_message: str = "PostgreSQL isn't reachable/initialized"
 
 
-class RaceConditionCreatingWalletError(BaseAppError):
-    default_message: str = "RACE CONDITION creating WALLET (registration process)"
-
-
 class WalletNotFoundError(BaseAppError):
     default_message: str = "Requested wallet not found"
 

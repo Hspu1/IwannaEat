@@ -1,34 +1,35 @@
-from collections.abc import AsyncGenerator
-from typing import Annotated
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
-from fastapi import Depends, Request
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
-from stripe import HTTPXClient, StripeClient
+from sqlalchemy.ext.asyncio import AsyncSession
+from stripe import StripeClient
 
 from src.core.env_conf import stripe_stg
 from src.shared.postgres.manager import PostgresManager
 
+from .exceptions import PostgresNotReachableError
 
-async def get_pg_session(request: Request) -> AsyncGenerator[AsyncSession, None]:
-    pg_manager: PostgresManager = request.app.state.pg_manager
-    session_maker: async_sessionmaker[AsyncSession] = pg_manager.get_session_maker()
+pg_manager: PostgresManager | None = None
 
+
+@asynccontextmanager
+async def pg_session() -> AsyncIterator[AsyncSession]:
+    if pg_manager is None:
+        raise PostgresNotReachableError
+
+    session_maker = pg_manager.get_session_maker()
     async with session_maker.begin() as session:
         yield session
 
 
-async def get_pg_ro_session(request: Request) -> AsyncGenerator[AsyncSession, None]:
-    pg_manager: PostgresManager = request.app.state.pg_manager
-    session_maker: async_sessionmaker[AsyncSession] = pg_manager.get_session_maker()
+@asynccontextmanager
+async def pg_ro_session() -> AsyncIterator[AsyncSession]:
+    if pg_manager is None:
+        raise PostgresNotReachableError
 
+    session_maker = pg_manager.get_session_maker()
     async with session_maker() as session:
         yield session
 
 
-async def get_stripe_client() -> StripeClient:
-    return StripeClient(api_key=stripe_stg.stripe_secret_key)
-
-
-PgSession = Annotated[AsyncSession, Depends(get_pg_session)]
-PgRoSession = Annotated[AsyncSession, Depends(get_pg_ro_session)]
-StripeClientDep = Annotated[StripeClient, Depends(get_stripe_client)]
+stripe_client = StripeClient(api_key=stripe_stg.stripe_secret_key)

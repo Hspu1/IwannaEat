@@ -13,7 +13,7 @@ def create_app() -> FastAPI:
 
     app = FastAPI(
         title="IwannaEat",
-        lifespan=get_lifespan(pg_manager=pg_manager),
+        lifespan=get_lifespan(pg_manager_instance=pg_manager),
         docs_url=None,
         redoc_url=None,
     )

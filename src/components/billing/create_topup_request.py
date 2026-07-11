@@ -3,16 +3,17 @@ from uuid import UUID
 
 from fastapi import APIRouter, Response, status
 from pydantic import BaseModel, Field
-from sqlalchemy import func, literal, select
+from sqlalchemy import exists, func, literal, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.dependencies import PgSession
+from src.core.dependencies import pg_session
 from src.shared.postgres.enums import OutboxEventType, TopUpStatus
 from src.shared.postgres.schema import (
     OutboxEventsModel,
     UserCardsModel,
+    UsersModel,
     WalletTopUpsModel,
 )
 
@@ -60,16 +61,14 @@ router = APIRouter()
 
 
 @router.post("/top-up")
-async def create_request(
-    session: PgSession, request: TopUpRequest, response: Response
-) -> ResultMessages:
-
-    verdict = await create_topup_request(
-        session=session,
-        user_id=request.user_id,
-        amount=request.amount,
-        idempotency_key=request.idempotency_key,
-    )
+async def create_request(request: TopUpRequest, response: Response) -> ResultMessages:
+    async with pg_session() as session:
+        verdict = await create_topup_request(
+            session=session,
+            user_id=request.user_id,
+            amount=request.amount,
+            idempotency_key=request.idempotency_key,
+        )
 
     match verdict:
         case ResultMessages.USER_NOT_FOUND:
@@ -101,6 +100,10 @@ async def create_topup_request(
     session: AsyncSession, user_id: UUID, amount: int, idempotency_key: UUID
 ) -> ResultMessages:
 
+    user_exists = await session.scalar(select(exists().where(UsersModel.id == user_id)))
+    if not user_exists:
+        return ResultMessages.USER_NOT_FOUND
+
     stmt_top_up = (
         pg_insert(WalletTopUpsModel)
         .from_select(
@@ -127,13 +130,8 @@ async def create_topup_request(
 
     except IntegrityError as err:
         driver_err = err.__cause__.__cause__  # wtf
-        if (
-            driver_err.sqlstate == ErrCauseState.OP_VIOLATES_FK_CONSTRAINT
-            and driver_err.constraint_name == ErrCauseConstraint.WALLET_TOP_UPS_USER_ID_FK
-        ):
-            return ResultMessages.USER_NOT_FOUND
 
-        elif (
+        if (
             driver_err.sqlstate == ErrCauseState.DUPLICATE_KEY
             and driver_err.constraint_name
             == ErrCauseConstraint.UQ_WALLET_TOP_UPS_USER_IDEMPOTENCY

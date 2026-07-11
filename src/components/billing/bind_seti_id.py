@@ -7,7 +7,7 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.dependencies import PgSession
+from src.core.dependencies import pg_session
 from src.shared.postgres.schema import UserCardsModel
 
 #######################################################################################
@@ -52,13 +52,11 @@ router = APIRouter(prefix="/bind")
 
 
 @router.post("/seti-id")
-async def bind_setup_intent(
-    session: PgSession, request: BindRequest, response: Response
-) -> ResultMessages:
-
-    verdict = await bind_seti_id(
-        session=session, user_id=request.user_id, seti_id=request.seti_id
-    )
+async def bind_setup_intent(request: BindRequest, response: Response) -> ResultMessages:
+    async with pg_session() as session:
+        verdict = await bind_seti_id(
+            session=session, user_id=request.user_id, seti_id=request.seti_id
+        )
 
     match verdict:
         case ResultMessages.USER_NOT_FOUND:

@@ -1,31 +1,42 @@
+from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from src.core import dependencies
 from src.shared.postgres.manager import PostgresManager
 
 from .exceptions import SafeStartError
 from .lifespan_helpers import safe_start, silent_close
 
 
-def get_lifespan(pg_manager: PostgresManager):
+def get_lifespan(
+    pg_manager_instance: PostgresManager,
+) -> Callable[[FastAPI], AsyncIterator[None]]:
+
     @asynccontextmanager
-    async def lifespan(app: FastAPI):
+    async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+        dependencies.pg_manager = pg_manager_instance
+
         try:
             await safe_start(
-                service_name="PostgreSQL", coro=pg_manager.connect(), atimeout=10.0
+                service_name="PostgreSQL",
+                coro=dependencies.pg_manager.connect(),
+                atimeout=10.0,
             )
         except Exception as e:
-            await silent_close(service_name="PostgreSQL", coro=pg_manager.disconnect())
+            await silent_close(
+                service_name="PostgreSQL", coro=dependencies.pg_manager.disconnect()
+            )
             raise SafeStartError(
                 message="App startup failed due to PostgreSQL error"
             ) from e
 
-        app.state.pg_manager = pg_manager
-
         try:
             yield
         finally:
-            await silent_close(service_name="PostgreSQL", coro=pg_manager.disconnect())
+            await silent_close(
+                service_name="PostgreSQL", coro=dependencies.pg_manager.disconnect()
+            )
 
     return lifespan
