@@ -11,9 +11,9 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from src.core.env_conf import pg_stg
-from src.shared.postgres.base import Base
-from src.shared.postgres.schema import (
+from iwe.core.env_conf import pg_stg
+from iwe.shared.postgres.base import Base
+from iwe.shared.postgres.schema import (
     DishesModel,
     DishIngredientsModel,
     IngredientsModel,
@@ -29,7 +29,7 @@ from src.shared.postgres.schema import (
 config = context.config
 current_dir = dirname(abspath(__file__))
 config.set_main_option("script_location", current_dir)
-config.set_main_option("sqlalchemy.url", pg_stg.postgres_url)
+config.set_main_option("sqlalchemy.url", str(pg_stg.postgres_url))
 
 
 # Interpret the config file for Python logging.

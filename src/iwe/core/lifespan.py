@@ -1,10 +1,10 @@
 from collections.abc import AsyncIterator, Callable
-from contextlib import asynccontextmanager
+from contextlib import AbstractAsyncContextManager, asynccontextmanager
 
 from fastapi import FastAPI
 
-from src.core import dependencies
-from src.shared.postgres.manager import PostgresManager
+from iwe.core import dependencies
+from iwe.shared.postgres.manager import PostgresManager
 
 from .exceptions import SafeStartError
 from .lifespan_helpers import safe_start, silent_close
@@ -12,7 +12,7 @@ from .lifespan_helpers import safe_start, silent_close
 
 def get_lifespan(
     pg_manager_instance: PostgresManager,
-) -> Callable[[FastAPI], AsyncIterator[None]]:
+) -> Callable[[FastAPI], AbstractAsyncContextManager[None]]:
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:

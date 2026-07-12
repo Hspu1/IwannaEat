@@ -1,18 +1,17 @@
 # activate uv w/ .venv\Scripts\activate (am OOM tho)
+# clean ts --> uv cache clean; Remove-Item -Recurse -Force .venv; uv sync
+
 [project]
-name = "IwannaEat"
+name = "iwe"
 version = "0.1.0"
-description = "Add your description here"
+description = "RDBMS maxxing for a highload FoodTech"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "aiohttp>=3.14.1",
     "alembic>=1.18.5",
     "asyncpg>=0.31.0",
     "fastapi>=0.139.0",
-    "granian>=2.7.8",
     "httpx>=0.28.1",
-    "loguru>=0.7.3",
     "orjson>=3.11.9",
     "pydantic-settings>=2.14.2",
     "sqlalchemy[asyncio]>=2.0.51",
@@ -22,8 +21,15 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "ruff>=0.15.21",  # uv run ruff check . --fix
+    # uvx ruff format .
+    "ty>=0.0.58",  # uvx ty check .
     "uvicorn>=0.49.0",
 ]
+
+[build-system]
+requires = ["uv-build"]
+build-backend = "uv_build"
 
 [tool.uv]  # ball idk, ensure correct environment
 environments = [
@@ -31,7 +37,11 @@ environments = [
     "sys_platform == 'linux' and platform_machine == 'x86_64'"
 ]
 
-[tool.ruff]  #  uv run ruff check .
+[tool.ty.src]
+include = ["src/iwe"]
+exclude = [".venv", "deploy/alembic"]
+
+[tool.ruff]
 fix = false
 line-length = 90
 exclude = ["alembic", "templates", "*.html", "*.jinja2"]
@@ -52,11 +62,14 @@ lint.select = [
     "YTT", # Python 3.10+ features
     "PL",  # Pylint
     "W",  # Pycodestyle warnings
-
+    "TID", # Flake8-tidy-imports
 ]
 
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "parents"
+
 [tool.ruff.lint.isort]
-known-first-party = ["IwannaEat"]  # name of the project
+known-first-party = ["iwe"]  # name of the project
 
 [tool.ruff.format]
 quote-style = "double"  # "" instead ''

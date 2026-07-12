@@ -1,6 +1,8 @@
 from enum import StrEnum
+from typing import cast
 from uuid import UUID
 
+import asyncpg
 from fastapi import APIRouter, Response, status
 from pydantic import BaseModel, Field
 from sqlalchemy import exists, func, literal, select
@@ -8,9 +10,9 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.dependencies import pg_session
-from src.shared.postgres.enums import OutboxEventType, TopUpStatus
-from src.shared.postgres.schema import (
+from iwe.core.dependencies import pg_session
+from iwe.shared.postgres.enums import OutboxEventType, TopUpStatus
+from iwe.shared.postgres.schema import (
     OutboxEventsModel,
     UserCardsModel,
     UsersModel,
@@ -129,7 +131,7 @@ async def create_topup_request(
         res_top_up = await session.execute(stmt_top_up)
 
     except IntegrityError as err:
-        driver_err = err.__cause__.__cause__  # wtf
+        driver_err = cast(asyncpg.PostgresError, err.__cause__.__cause__)  # wtf
 
         if (
             driver_err.sqlstate == ErrCauseState.DUPLICATE_KEY
@@ -143,7 +145,6 @@ async def create_topup_request(
     if res_top_up.one_or_none() is None:
         return ResultMessages.NO_CARD_LAD
 
-    event_type = OutboxEventType.HOLD_FUNDS_REQUESTED
     payload = func.json_build_object(
         WalletTopUpsModel.user_id.name,
         user_id,
@@ -157,7 +158,7 @@ async def create_topup_request(
 
     stmt_outbox = pg_insert(OutboxEventsModel).from_select(
         [OutboxEventsModel.event_type.name, OutboxEventsModel.payload.name],
-        select(event_type, payload)
+        select(literal(OutboxEventType.HOLD_FUNDS_REQUESTED), payload)
         .select_from(UserCardsModel)
         .where(UserCardsModel.user_id == user_id),
     )

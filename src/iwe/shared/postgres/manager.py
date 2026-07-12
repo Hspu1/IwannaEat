@@ -17,9 +17,9 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.pool import NullPool  # noqa
 
-from src.core.base import StrictSlots
-from src.core.env_conf import PostgresSettings
-from src.core.exceptions import PostgresNotReachableError
+from iwe.core.base import StrictSlots
+from iwe.core.env_conf import PostgresSettings
+from iwe.core.exceptions import PostgresNotReachableError
 
 
 def orjson_dumps(data: Any) -> bytes:
@@ -46,7 +46,7 @@ class PostgresManager(StrictSlots):
             start = perf_counter()
             self._engine = create_async_engine(
                 # url=self._cfg.pgbouncer_url,
-                url=self._cfg.postgres_url,
+                url=str(self._cfg.postgres_url),
                 json_serializer=orjson_dumps,
                 json_deserializer=orjson_loads,
                 # poolclass=NullPool,
@@ -79,7 +79,7 @@ class PostgresManager(StrictSlots):
             raise PostgresNotReachableError from e
 
     async def ping(self) -> None:
-        if not self._engine:
+        if not self._engine or not self._session_maker:
             raise PostgresNotReachableError
 
         async with self._session_maker() as session:

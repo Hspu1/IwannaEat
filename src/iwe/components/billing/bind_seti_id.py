@@ -7,8 +7,8 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.dependencies import pg_session
-from src.shared.postgres.schema import UserCardsModel
+from iwe.core.dependencies import pg_session
+from iwe.shared.postgres.schema import UserCardsModel
 
 #######################################################################################
 #######################################################################################

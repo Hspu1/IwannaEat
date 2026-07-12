@@ -1,11 +1,11 @@
 from fastapi import FastAPI
 
-from src.core.env_conf import pg_stg
-from src.core.lifespan import get_lifespan
-from src.shared.postgres.manager import PostgresManager
+from iwe import scalar_spec
+from iwe.core.env_conf import pg_stg
+from iwe.core.lifespan import get_lifespan
+from iwe.shared.postgres.manager import PostgresManager
 
 from .components import components_router
-from .docs import static_docs_urls
 
 
 def create_app() -> FastAPI:
@@ -17,7 +17,7 @@ def create_app() -> FastAPI:
         docs_url=None,
         redoc_url=None,
     )
-    static_docs_urls(app=app)
+    scalar_spec.mount_standalone(app=app)
 
     app.include_router(components_router)
 
@@ -27,4 +27,4 @@ def create_app() -> FastAPI:
 app = create_app()
 
 # run locally w/
-# uv run --group dev uvicorn src.main:app --host 127.0.0.1 --port 1488 --workers 1
+# uv run --group dev uvicorn main:app --host 127.0.0.1 --port 1488 --workers 1

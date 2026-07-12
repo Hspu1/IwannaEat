@@ -4,8 +4,8 @@ from fastapi import APIRouter, status
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.dependencies import pg_session
-from src.shared.postgres.schema import UsersModel, WalletsModel
+from iwe.core.dependencies import pg_session
+from iwe.shared.postgres.schema import UsersModel, WalletsModel
 
 router = APIRouter()
 
