@@ -1,0 +1,54 @@
+{
+  "name": "Sacrificial Virgin Double Burger",
+  "meta": {
+    "weight_g": 450.0,
+    "is_vegan": false,
+    "is_psyop": true,
+    "macro": {
+      "calories": 1120.0,
+      "proteins_g": 99.0,
+      "fats_g": 76.5,
+      "carbs_g": 12.0,
+      "water_percentage": 45.5
+    },
+    "micro_and_toxic": {
+      "saturated_fats_g": 25.4,
+      "trans_fats_g": 8.5,
+      "cholesterol_g": 0.35,
+      "sodium_g": 2.1,
+      "lead_g": 0.00045,
+      "cadmium_g": 0.00012,
+      "mercury_g": 0.0,
+      "rat_poison_g": 0.012,
+      "arsenic_g": 0.00005,
+      "msg_g": 4.5,
+      "benzoate_sodium_g": 0.85,
+      "acrylamide_g": 0.0012
+    }
+  },
+
+  "origin_and_recipe": {
+    "origin_zone": "Serpent Country",
+    "cooking_process": "Press the patty, add cayenne pepper. Grind believers to feed to doubters until architecture falls down behind me.",
+    "ingredients_weight_g": {
+      "mystery_meat": 200.0,
+      "sacrificial_virgins": 150.0,
+      "chunks_of_avement": 50.0,
+      "swiss_cheese": 45.0,
+      "dish_detergent": 0.005,
+      "wizard_weed": 4.995
+    },
+    "supply_chain": [
+      {
+        "merchant_name": "Leatherface Meat Grinder",
+        "location": "Cul-de-sac",
+        "trust_level": 2
+      },
+      {
+        "merchant_name": "Bilderberg Secret Service",
+        "location": "Stonehenge",
+        "trust_level": 7
+      }
+    ]
+  }
+}

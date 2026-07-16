@@ -1,0 +1,50 @@
+{
+  "name": "Cybernetic Demon Burger",
+  "meta": {
+    "weight_g": 854.6,
+    "is_vegan": false,
+    "is_psyop": false,
+    "macro": {
+      "calories": 1213.6,
+      "proteins_g": 149.6,
+      "fats_g": 36.3,
+      "carbs_g": 76.6,
+      "water_percentage": 62.9
+    },
+    "micro_and_toxic": {
+      "saturated_fats_g": 43.19,
+      "trans_fats_g": 3.14,
+      "lead_g": 0.0016,
+      "rat_poison_g": 0.3402,
+      "cadmium_g": 0.0145,
+      "mercury_g": 0.0038,
+      "arsenic_g": 0.00095,
+      "polonium_210_mcg": 12.4,
+      "strontium_90_g": 0.056,
+      "acrylamide_g": 0.124,
+      "benzoate_sodium_g": 4.5,
+      "cyber_parasites_count": 666.0,
+      "liquid_hatred_ml": 15.0,
+      "nano_plastics_g": 2.87,
+      "msg_g": 18.5
+    }
+  },
+  "origin_and_recipe": {
+    "origin_zone": "Forgotten Sewers",
+    "cooking_process": "Inject liquid nitrogen directly into the radioactive core of uranium dust until it reaches critical mass. Sear chunks of pavement over burning server racks processing 666 terabytes of cursed telemetry. Spread Illuminati sauce onto carbonized dark matter buns. Assemble under a blood moon while chanting raw assembly code until architecture stabilizes.",
+    "ingredients_weight_g": {
+      "dark_matter_buns": 53.157,
+      "liquid_nitrogen": 124.808,
+      "chunks_of_avement": 221.171,
+      "uranium_dust": 160.713,
+      "illuminati_sauce": 35.719
+    },
+    "supply_chain": [
+      {
+        "merchant_name": "Satan Sous Chef",
+        "location": "Gotham Docks",
+        "trust_level": 8
+      }
+    ]
+  }
+}

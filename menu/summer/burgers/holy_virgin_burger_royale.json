@@ -1,0 +1,46 @@
+{
+  "name": "Holy Virgin Burger Royale",
+  "meta": {
+    "weight_g": 597.4,
+    "is_vegan": false,
+    "is_psyop": true,
+    "macro": {
+      "calories": 1905.6,
+      "proteins_g": 34.0,
+      "fats_g": 148.5,
+      "carbs_g": 28.7,
+      "water_percentage": 36.6
+    },
+    "micro_and_toxic": {
+      "saturated_fats_g": 49.49,
+      "trans_fats_g": 12.84,
+      "lead_g": 0.00557,
+      "rat_poison_g": 0.3423
+    }
+  },
+  "origin_and_recipe": {
+    "origin_zone": "Chernobyl Zone",
+    "cooking_process": "Submerge the sacrificial patty into liquefied crystal-meth cheese. Microwave for exactly 42 seconds in a shielding chamber while broadcasting low-frequency Sumerian hymns into the local grid. Do not look directly at the cheese during molecular meltdown. Layer radioactive pickles over crushed bones. Garnish with a heavy dusting of depleted uranium. Serve before the containment dome collapses behind you.",
+    "ingredients_weight_g": {
+      "chunks_of_avement": 17.39,
+      "crystal_meth_cheese": 165.316,
+      "crushed_bones": 193.267,
+      "radioactive_pickles": 246.305,
+      "uranium_dust": 213.83,
+      "holy_water_detergent": 4.5,
+      "cyber_parasites": 0.012
+    },
+    "supply_chain": [
+      {
+        "merchant_name": "Area 51 Commissary",
+        "location": "Mars Base Alpha",
+        "trust_level": 10
+      },
+      {
+        "merchant_name": "Chernobyl Export Corp",
+        "location": "The Void",
+        "trust_level": 5
+      }
+    ]
+  }
+}

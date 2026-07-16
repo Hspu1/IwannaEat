@@ -1,0 +1,48 @@
+{
+  "name": "Popes Holy Singularity Burger Royale",
+  "meta": {
+    "weight_g": 450.2,
+    "is_vegan": false,
+    "is_psyop": true,
+    "macro": {
+      "calories": 999.9,
+      "proteins_g": 45.5,
+      "fats_g": 32.1,
+      "carbs_g": 110.0,
+      "water_percentage": 77.7
+    },
+    "micro_and_toxic": {
+      "saturated_fats_g": 12.4,
+      "trans_fats_g": 1.15,
+      "lead_g": 0.0,
+      "rat_poison_g": 0.0
+    }
+  },
+  "origin_and_recipe": {
+    "origin_zone": "Area 51 Cafeteria",
+    "cooking_process": "Bless the mayonnaise under a particle accelerator. Teleport the buns from a parallel dimension where fast food is a state religion. Layer with sentient ketchup that begs for mercy as you bite down.",
+    "ingredients_weight_g": {
+      "blessed_mayonnaise": 45.0,
+      "sentient_ketchup": 15.2,
+      "swiss_cheese": 90.0,
+      "mystery_meat": 300.0
+    },
+    "supply_chain": [
+      {
+        "merchant_name": "The Pope Private Pantry",
+        "location": "Vatican Vaults",
+        "trust_level": 10
+      },
+      {
+        "merchant_name": "Illuminati Catering Co",
+        "location": "Bermuda Triangle",
+        "trust_level": 7
+      },
+      {
+        "merchant_name": "Cyber-Yakuza Syndicate",
+        "location": "Neon Wasteland",
+        "trust_level": 4
+      }
+    ]
+  }
+}

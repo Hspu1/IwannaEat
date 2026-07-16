@@ -1,0 +1,39 @@
+{
+  "name": "Quantum Shrödingers Glitch Burger",
+  "meta": {
+    "weight_g": 133.7,
+    "is_vegan": true,
+    "is_psyop": true,
+    "macro": {
+      "calories": 0.0,
+      "proteins_g": 0.0,
+      "fats_g": 0.0,
+      "carbs_g": 0.0,
+      "water_percentage": 0.1
+    },
+    "micro_and_toxic": {
+      "saturated_fats_g": 0.0,
+      "trans_fats_g": 0.0,
+      "lead_g": 0.00001,
+      "rat_poison_g": 0.0,
+      "antimatter_particles_count": 999999.0,
+      "dark_energy_leak_ml": 0.00003
+    }
+  },
+  "origin_and_recipe": {
+    "origin_zone": "Flat Earth Edge",
+    "cooking_process": "Do not observe the patty. The moment you look at the grill, the waveform collapses and the meat burns. Compress lightspeed photons into simulated lettuce layers. Serve in an active electromagnetic containment field.",
+    "ingredients_weight_g": {
+      "quantum_entangled_onions": 0.001,
+      "simulated_data_buns": 120.5,
+      "void_essence": 13.199
+    },
+    "supply_chain": [
+      {
+        "merchant_name": "Shadow Government Supplies",
+        "location": "The Void",
+        "trust_level": 0
+      }
+    ]
+  }
+}

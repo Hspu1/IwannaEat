@@ -1,0 +1,43 @@
+{
+  "name": "Baba Yagas Necro-Crunch Mega Burger",
+  "meta": {
+    "weight_g": 1250.0,
+    "is_vegan": false,
+    "is_psyop": false,
+    "macro": {
+      "calories": 2850.0,
+      "proteins_g": 112.5,
+      "fats_g": 198.4,
+      "carbs_g": 45.1,
+      "water_percentage": 15.6
+    },
+    "micro_and_toxic": {
+      "saturated_fats_g": 48.9,
+      "trans_fats_g": 19.5,
+      "lead_g": 0.00985,
+      "rat_poison_g": 0.4999,
+      "swamp_sludge_g": 34.5,
+      "witch_curse_units": 66.6,
+      "black_mold_spores_mg": 850.0,
+      "dead_soil_g": 115.0,
+      "nightshade_extract_ml": 5.25
+    }
+  },
+  "origin_and_recipe": {
+    "origin_zone": "Cthulhu Kitchen",
+    "cooking_process": "Grind the bone marrow of ancient creatures in a mortar made of pure obsidian. Boil the sludge over a slow fire fed by broken promises and dark folklore. Stack inside petrified sourdough buns.",
+    "ingredients_weight_g": {
+      "crushed_bones": 450.0,
+      "fermented_toe_jam": 50.0,
+      "mystery_meat": 600.0,
+      "chunks_of_avement": 150.0
+    },
+    "supply_chain": [
+      {
+        "merchant_name": "Morgul Dufel Black Market",
+        "location": "Hollow Earth Entrance",
+        "trust_level": 1
+      }
+    ]
+  }
+}

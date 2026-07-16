@@ -1,0 +1,45 @@
+{
+  "name": "Psychic Clown Double Burger",
+  "meta": {
+    "weight_g": 925.0,
+    "is_vegan": true,
+    "is_psyop": true,
+    "macro": {
+      "calories": 2154.8,
+      "proteins_g": 57.6,
+      "fats_g": 39.5,
+      "carbs_g": 143.8,
+      "water_percentage": 33.6
+    },
+    "micro_and_toxic": {
+      "saturated_fats_g": 5.54,
+      "trans_fats_g": 2.02,
+      "lead_g": 0.00847,
+      "rat_poison_g": 0.3019,
+      "cyber_toxin_omega_g": 1.45
+    }
+  },
+  "origin_and_recipe": {
+    "origin_zone": "Dystopian Sector 7",
+    "cooking_process": "Ferment the synthesized bio-buns in a vat of pulsing radioactive waste. Extract microplastics from ancient ocean layers. Assemble the layout while wearing a heavy tin foil hat to block the clown-mind-control frequencies. Inject dish detergent into the synthetic matrix until it glows in the dark. Serve to people who still believe that reality is stable.",
+    "ingredients_weight_g": {
+      "microplastics": 147.624,
+      "dish_detergent": 7.947,
+      "synthetic_weed_buns": 23.425,
+      "chunks_of_avement": 58.166,
+      "clown_tears_concentrate": 12.5
+    },
+    "supply_chain": [
+      {
+        "merchant_name": "Cybernetic Bio-Lab 404",
+        "location": "The Backrooms",
+        "trust_level": 3
+      },
+      {
+        "merchant_name": "Walmart Dimension X",
+        "location": "Raccoon City",
+        "trust_level": 8
+      }
+    ]
+  }
+}
