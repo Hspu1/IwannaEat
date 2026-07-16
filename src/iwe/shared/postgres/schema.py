@@ -19,11 +19,11 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base
 from .check_constraints import (
-    CHK_DISHES_DYNAMIC_INGREDIENTS_WEIGHT_VALID,
+    CHK_DISHES_INGREDIENTS_WEIGHT_VALID,
+    CHK_DISHES_META_METRICS,
     CHK_DISHES_NAME_RULES,
     CHK_DISHES_RECIPE_AND_SUPPLY_CHAIN_RULES,
     CHK_DISHES_ROOT_STRUCTURE_AND_TYPES,
-    CHK_DISHES_STATIC_META_METRICS,
 )
 from .enums import OrderStatus, OutboxEventType, TopUpStatus
 from .mixins import TimestampMixin, UUIDv7Mixin
@@ -121,9 +121,9 @@ class DishesModel(Base, UUIDv7Mixin):
     __table_args__ = (
         CHK_DISHES_ROOT_STRUCTURE_AND_TYPES,
         CHK_DISHES_NAME_RULES,
-        CHK_DISHES_STATIC_META_METRICS,
+        CHK_DISHES_META_METRICS,
         CHK_DISHES_RECIPE_AND_SUPPLY_CHAIN_RULES,
-        CHK_DISHES_DYNAMIC_INGREDIENTS_WEIGHT_VALID,
+        CHK_DISHES_INGREDIENTS_WEIGHT_VALID,
         Index(
             "uq_dishes_name_lowercase",
             func.lower(info["name"].as_string()),

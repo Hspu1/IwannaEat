@@ -17,7 +17,7 @@ CHK_DISHES_NAME_RULES: Final[CheckConstraint] = CheckConstraint(
     name="chk_dishes_name_rules",
 )
 
-CHK_DISHES_STATIC_META_METRICS: Final[CheckConstraint] = CheckConstraint(
+CHK_DISHES_META_METRICS: Final[CheckConstraint] = CheckConstraint(
     text("""
         (jsonb_typeof(info -> 'meta' -> 'weight_g') = 'number' AND (info -> 'meta' -> 'weight_g')::text::float > 0) AND
         (jsonb_typeof(info -> 'meta' -> 'is_vegan') = 'boolean') AND
@@ -28,10 +28,11 @@ CHK_DISHES_STATIC_META_METRICS: Final[CheckConstraint] = CheckConstraint(
         (jsonb_typeof(info -> 'meta' -> 'macro' -> 'fats_g') = 'number' AND (info -> 'meta' -> 'macro' ->> 'fats_g')::float >= 0) AND
         (jsonb_typeof(info -> 'meta' -> 'macro' -> 'carbs_g') = 'number' AND (info -> 'meta' -> 'macro' ->> 'carbs_g')::float >= 0) AND
 
-        (jsonb_typeof(info -> 'meta' -> 'micro_and_toxic' -> 'saturated_fats_g') = 'number' AND (info -> 'meta' -> 'micro_and_toxic' ->> 'saturated_fats_g')::float >= 0) AND
-        (jsonb_typeof(info -> 'meta' -> 'micro_and_toxic' -> 'trans_fats_g') = 'number' AND (info -> 'meta' -> 'micro_and_toxic' ->> 'trans_fats_g')::float >= 0) AND
-        (jsonb_typeof(info -> 'meta' -> 'micro_and_toxic' -> 'lead_g') = 'number' AND (info -> 'meta' -> 'micro_and_toxic' ->> 'lead_g')::float >= 0) AND
-        (jsonb_typeof(info -> 'meta' -> 'micro_and_toxic' -> 'rat_poison_g') = 'number' AND (info -> 'meta' -> 'micro_and_toxic' ->> 'rat_poison_g')::float >= 0) AND
+        (jsonb_typeof(info -> 'meta' -> 'micro_and_toxic') = 'object') AND
+        NOT jsonb_path_exists(
+            info -> 'meta' -> 'micro_and_toxic',
+            '$.* ? (@.type() != "number" || @ < 0)'
+        ) AND
 
         (jsonb_typeof(info -> 'meta' -> 'macro' -> 'water_percentage') = 'number' AND
         (info -> 'meta' -> 'macro' ->> 'water_percentage')::float BETWEEN 0.0 AND 100.0)
@@ -61,7 +62,7 @@ CHK_DISHES_RECIPE_AND_SUPPLY_CHAIN_RULES: Final[CheckConstraint] = CheckConstrai
     name="chk_dishes_recipe_and_supply_chain_rules",
 )
 
-CHK_DISHES_DYNAMIC_INGREDIENTS_WEIGHT_VALID: Final[CheckConstraint] = CheckConstraint(
+CHK_DISHES_INGREDIENTS_WEIGHT_VALID: Final[CheckConstraint] = CheckConstraint(
     text("""
         (info -> 'origin_and_recipe' -> 'ingredients_weight_g') IS NOT NULL AND
         (jsonb_typeof(info -> 'origin_and_recipe' -> 'ingredients_weight_g') = 'object') AND
