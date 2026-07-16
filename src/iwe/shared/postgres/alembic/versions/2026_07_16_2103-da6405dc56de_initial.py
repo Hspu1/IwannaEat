@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: ff4fa56203a2
+Revision ID: da6405dc56de
 Revises:
-Create Date: 2026-07-16 20:45:03.691174
+Create Date: 2026-07-16 21:03:20.041199
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = 'ff4fa56203a2'
+revision: str = 'da6405dc56de'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -27,7 +27,7 @@ def upgrade() -> None:
             sa.Column('info', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
     sa.CheckConstraint("(info -> 'name') IS NOT NULL AND (jsonb_typeof(info -> 'name') = 'string') AND (info -> 'meta') IS NOT NULL AND (jsonb_typeof(info -> 'meta') = 'object') AND (info -> 'origin_and_recipe') IS NOT NULL AND (jsonb_typeof(info -> 'origin_and_recipe') = 'object')", name='chk_dishes_root_structure_and_types'),
     sa.CheckConstraint("(length(info ->> 'name') BETWEEN 5 AND 67) AND (info ->> 'name' ~* 'burger')", name='chk_dishes_name_rules'),
-    sa.CheckConstraint("\n        (jsonb_typeof(info -> 'meta' -> 'macro' -> 'calories') = 'number' AND (info -> 'meta' -> 'macro' ->> 'calories')::float >= 0) AND\n        (jsonb_typeof(info -> 'meta' -> 'macro' -> 'proteins_g') = 'number' AND (info -> 'meta' -> 'macro' ->> 'proteins_g')::float >= 0) AND\n        (jsonb_typeof(info -> 'meta' -> 'macro' -> 'fats_g') = 'number' AND (info -> 'meta' -> 'macro' ->> 'fats_g')::float >= 0) AND\n        (jsonb_typeof(info -> 'meta' -> 'macro' -> 'carbs_g') = 'number' AND (info -> 'meta' -> 'macro' ->> 'carbs_g')::float >= 0) AND\n\n        (jsonb_typeof(info -> 'meta' -> 'micro_and_toxic' -> 'saturated_fats_g') = 'number' AND (info -> 'meta' -> 'micro_and_toxic' ->> 'saturated_fats_g')::float >= 0) AND\n        (jsonb_typeof(info -> 'meta' -> 'micro_and_toxic' -> 'trans_fats_g') = 'number' AND (info -> 'meta' -> 'micro_and_toxic' ->> 'trans_fats_g')::float >= 0) AND\n        (jsonb_typeof(info -> 'meta' -> 'micro_and_toxic' -> 'lead_g') = 'number' AND (info -> 'meta' -> 'micro_and_toxic' ->> 'lead_g')::float >= 0) AND\n        (jsonb_typeof(info -> 'meta' -> 'micro_and_toxic' -> 'rat_poison_g') = 'number' AND (info -> 'meta' -> 'micro_and_toxic' ->> 'rat_poison_g')::float >= 0) AND\n\n        (jsonb_typeof(info -> 'meta' -> 'macro' -> 'water_percentage') = 'number' AND\n        (info -> 'meta' -> 'macro' ->> 'water_percentage')::float BETWEEN 0.0 AND 100.0)\n    ", name='chk_dishes_static_meta_metrics'),
+    sa.CheckConstraint("\n        (jsonb_typeof(info -> 'meta' -> 'weight_g') = 'number' AND (info -> 'meta' -> 'weight_g')::text::float > 0) AND\n        (jsonb_typeof(info -> 'meta' -> 'is_vegan') = 'boolean') AND\n        (jsonb_typeof(info -> 'meta' -> 'is_psyop') = 'boolean') AND\n\n        (jsonb_typeof(info -> 'meta' -> 'macro' -> 'calories') = 'number' AND (info -> 'meta' -> 'macro' ->> 'calories')::float >= 0) AND\n        (jsonb_typeof(info -> 'meta' -> 'macro' -> 'proteins_g') = 'number' AND (info -> 'meta' -> 'macro' ->> 'proteins_g')::float >= 0) AND\n        (jsonb_typeof(info -> 'meta' -> 'macro' -> 'fats_g') = 'number' AND (info -> 'meta' -> 'macro' ->> 'fats_g')::float >= 0) AND\n        (jsonb_typeof(info -> 'meta' -> 'macro' -> 'carbs_g') = 'number' AND (info -> 'meta' -> 'macro' ->> 'carbs_g')::float >= 0) AND\n\n        (jsonb_typeof(info -> 'meta' -> 'micro_and_toxic' -> 'saturated_fats_g') = 'number' AND (info -> 'meta' -> 'micro_and_toxic' ->> 'saturated_fats_g')::float >= 0) AND\n        (jsonb_typeof(info -> 'meta' -> 'micro_and_toxic' -> 'trans_fats_g') = 'number' AND (info -> 'meta' -> 'micro_and_toxic' ->> 'trans_fats_g')::float >= 0) AND\n        (jsonb_typeof(info -> 'meta' -> 'micro_and_toxic' -> 'lead_g') = 'number' AND (info -> 'meta' -> 'micro_and_toxic' ->> 'lead_g')::float >= 0) AND\n        (jsonb_typeof(info -> 'meta' -> 'micro_and_toxic' -> 'rat_poison_g') = 'number' AND (info -> 'meta' -> 'micro_and_toxic' ->> 'rat_poison_g')::float >= 0) AND\n\n        (jsonb_typeof(info -> 'meta' -> 'macro' -> 'water_percentage') = 'number' AND\n        (info -> 'meta' -> 'macro' ->> 'water_percentage')::float BETWEEN 0.0 AND 100.0)\n    ", name='chk_dishes_static_meta_metrics'),
     sa.CheckConstraint('\n        (info -> \'origin_and_recipe\' -> \'ingredients_weight_g\') IS NOT NULL AND\n        (jsonb_typeof(info -> \'origin_and_recipe\' -> \'ingredients_weight_g\') = \'object\') AND\n\n        NOT jsonb_path_exists(\n            info -> \'origin_and_recipe\' -> \'ingredients_weight_g\',\n            \'$.* ? (@.type() != "number" || @ < 0)\'\n        )\n    ', name='chk_dishes_dynamic_ingredients_weight_valid'),
     sa.CheckConstraint('\n        (length(info -> \'origin_and_recipe\' ->> \'origin_zone\') BETWEEN 10 AND 67) AND\n        (length(info -> \'origin_and_recipe\' ->> \'cooking_process\') BETWEEN 10 AND 1488) AND\n        (jsonb_typeof(info -> \'origin_and_recipe\' -> \'supply_chain\') = \'array\') AND\n\n        NOT jsonb_path_exists(\n            info -> \'origin_and_recipe\' -> \'supply_chain\',\n            \'$[*] ? (\n                @.merchant_name.type() != "string" ||\n                @.location.type() != "string" ||\n                @.trust_level.type() != "number" ||\n                !(@.merchant_name like_regex "^.{1,67}$") ||\n                !(@.location like_regex "^.{1,67}$") ||\n                @.trust_level < 0 ||\n                @.trust_level > 32767\n            )\'\n        )\n    ', name='chk_dishes_recipe_and_supply_chain_rules'),
     sa.PrimaryKeyConstraint('id')
@@ -38,9 +38,9 @@ def upgrade() -> None:
 
 
     op.create_table('ingredients',
-                    sa.Column('id', sa.Uuid(), nullable=False),
-                    sa.Column('name', sa.String(length=50), nullable=False),
-                    sa.Column('is_available', sa.Boolean(), nullable=False),
+            sa.Column('id', sa.Uuid(), nullable=False),
+            sa.Column('name', sa.String(length=50), nullable=False),
+            sa.Column('is_available', sa.Boolean(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index('uq_ingredients_name_lowercase', 'ingredients', [sa.literal_column('lower(name)')], unique=True, postgresql_where=sa.text('is_available IS true'))
@@ -48,10 +48,10 @@ def upgrade() -> None:
 
 
     op.create_table('outbox_events',
-                    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-                    sa.Column('id', sa.BIGINT(), autoincrement=True, nullable=False),
-                    sa.Column('event_type', sa.SmallInteger(), nullable=False),
-                    sa.Column('payload', postgresql.JSON(astext_type=sa.Text()), nullable=False),
+            sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+            sa.Column('id', sa.BIGINT(), autoincrement=True, nullable=False),
+            sa.Column('event_type', sa.SmallInteger(), nullable=False),
+            sa.Column('payload', postgresql.JSON(astext_type=sa.Text()), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
 
@@ -65,10 +65,10 @@ def upgrade() -> None:
 
 
     op.create_table('dish_ingredients',
-                    sa.Column('dish_id', sa.Uuid(), nullable=False),
-                    sa.Column('ingredient_id', sa.Uuid(), nullable=False),
-            sa.ForeignKeyConstraint(['dish_id'], ['dishes.id'], ondelete='CASCADE'),
-            sa.ForeignKeyConstraint(['ingredient_id'], ['ingredients.id'], ondelete='CASCADE'),
+            sa.Column('dish_id', sa.Uuid(), nullable=False),
+            sa.Column('ingredient_id', sa.Uuid(), nullable=False),
+        sa.ForeignKeyConstraint(['dish_id'], ['dishes.id'], ondelete='CASCADE'),
+        sa.ForeignKeyConstraint(['ingredient_id'], ['ingredients.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('dish_id', 'ingredient_id')
     )
     op.create_index('idx_dish_ingredient', 'dish_ingredients', ['ingredient_id'], unique=False)
@@ -76,13 +76,13 @@ def upgrade() -> None:
 
 
     op.create_table('orders',
-                    sa.Column('id', sa.Uuid(), nullable=False),
-                    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-                    sa.Column('user_id', sa.Uuid(), nullable=False),
-                    sa.Column('total_price', sa.BIGINT(), nullable=False),
-                    sa.Column('status', sa.SmallInteger(), nullable=False),
-                    sa.Column('items', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
-            sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='RESTRICT'),
+            sa.Column('id', sa.Uuid(), nullable=False),
+            sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+            sa.Column('user_id', sa.Uuid(), nullable=False),
+            sa.Column('total_price', sa.BIGINT(), nullable=False),
+            sa.Column('status', sa.SmallInteger(), nullable=False),
+            sa.Column('items', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
+        sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='RESTRICT'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index('idx_orders_user_active', 'orders', ['user_id'], unique=False, postgresql_where=sa.text('status IN (1, 2, 3)'))
@@ -90,10 +90,10 @@ def upgrade() -> None:
 
 
     op.create_table('user_cards',
-                    sa.Column('id', sa.Uuid(), nullable=False),
-                    sa.Column('user_id', sa.Uuid(), nullable=False),
-                    sa.Column('seti_id', sa.String(length=29), nullable=False),
-            sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='RESTRICT'),
+            sa.Column('id', sa.Uuid(), nullable=False),
+            sa.Column('user_id', sa.Uuid(), nullable=False),
+            sa.Column('seti_id', sa.String(length=29), nullable=False),
+        sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='RESTRICT'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index('uq_user_cards_seti_id', 'user_cards', ['seti_id'], unique=True)
@@ -102,13 +102,13 @@ def upgrade() -> None:
 
 
     op.create_table('wallet_top_ups',
-                    sa.Column('id', sa.Uuid(), nullable=False),
-                    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-                    sa.Column('user_id', sa.Uuid(), nullable=False),
-                    sa.Column('idempotency_key', sa.Uuid(), nullable=False),
-                    sa.Column('amount', sa.BIGINT(), nullable=False),
-                    sa.Column('status', sa.SmallInteger(), server_default=sa.text('1'), nullable=False),
-            sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='RESTRICT'),
+            sa.Column('id', sa.Uuid(), nullable=False),
+            sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+            sa.Column('user_id', sa.Uuid(), nullable=False),
+            sa.Column('idempotency_key', sa.Uuid(), nullable=False),
+            sa.Column('amount', sa.BIGINT(), nullable=False),
+            sa.Column('status', sa.SmallInteger(), server_default=sa.text('1'), nullable=False),
+        sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='RESTRICT'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('user_id', 'idempotency_key', name='uq_wallet_top_ups_user_idempotency')
     )
@@ -118,10 +118,10 @@ def upgrade() -> None:
 
 
     op.create_table('wallets',
-                    sa.Column('user_id', sa.Uuid(), nullable=False),
-                    sa.Column('balance', sa.BIGINT(), server_default=sa.text('0'), nullable=False),
-                    sa.Column('cashback_balance', sa.BIGINT(), server_default=sa.text('0'), nullable=False),
-            sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='RESTRICT'),
+            sa.Column('user_id', sa.Uuid(), nullable=False),
+            sa.Column('balance', sa.BIGINT(), server_default=sa.text('0'), nullable=False),
+            sa.Column('cashback_balance', sa.BIGINT(), server_default=sa.text('0'), nullable=False),
+        sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='RESTRICT'),
     sa.PrimaryKeyConstraint('user_id')
     )
     op.execute("ALTER TABLE wallets SET (fillfactor = 76)")
@@ -129,9 +129,9 @@ def upgrade() -> None:
 
 
     op.create_table('warehouse',
-                    sa.Column('ingredient_id', sa.Uuid(), nullable=False),
-                    sa.Column('quantity', sa.Integer(), nullable=False),
-            sa.ForeignKeyConstraint(['ingredient_id'], ['ingredients.id'], ondelete='RESTRICT'),
+            sa.Column('ingredient_id', sa.Uuid(), nullable=False),
+            sa.Column('quantity', sa.Integer(), nullable=False),
+        sa.ForeignKeyConstraint(['ingredient_id'], ['ingredients.id'], ondelete='RESTRICT'),
     sa.PrimaryKeyConstraint('ingredient_id')
     )
     op.execute("ALTER TABLE warehouse SET (fillfactor = 67)")

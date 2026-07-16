@@ -2,6 +2,7 @@ from typing import Final
 
 from sqlalchemy import CheckConstraint, text
 
+
 CHK_DISHES_ROOT_STRUCTURE_AND_TYPES: Final[CheckConstraint] = CheckConstraint(
     text(
         "(info -> 'name') IS NOT NULL AND (jsonb_typeof(info -> 'name') = 'string') AND "
@@ -18,6 +19,10 @@ CHK_DISHES_NAME_RULES: Final[CheckConstraint] = CheckConstraint(
 
 CHK_DISHES_STATIC_META_METRICS: Final[CheckConstraint] = CheckConstraint(
     text("""
+        (jsonb_typeof(info -> 'meta' -> 'weight_g') = 'number' AND (info -> 'meta' -> 'weight_g')::text::float > 0) AND
+        (jsonb_typeof(info -> 'meta' -> 'is_vegan') = 'boolean') AND
+        (jsonb_typeof(info -> 'meta' -> 'is_psyop') = 'boolean') AND
+
         (jsonb_typeof(info -> 'meta' -> 'macro' -> 'calories') = 'number' AND (info -> 'meta' -> 'macro' ->> 'calories')::float >= 0) AND
         (jsonb_typeof(info -> 'meta' -> 'macro' -> 'proteins_g') = 'number' AND (info -> 'meta' -> 'macro' ->> 'proteins_g')::float >= 0) AND
         (jsonb_typeof(info -> 'meta' -> 'macro' -> 'fats_g') = 'number' AND (info -> 'meta' -> 'macro' ->> 'fats_g')::float >= 0) AND
