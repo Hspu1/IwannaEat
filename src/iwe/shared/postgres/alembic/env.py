@@ -14,14 +14,16 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from iwe.core.env_conf import pg_stg
 from iwe.shared.postgres.base import Base
 from iwe.shared.postgres.schema import (
-    DishesModel,
-    DishIngredientsModel,
-    IngredientsModel,
-    OrdersModel,
-    OutboxEventsModel,
     UsersModel,
     WalletsModel,
+    UserCardsModel,
+    WalletTopUpsModel,
+    DishesModel,
+    IngredientsModel,
     WarehouseModel,
+    OrdersModel,
+    OrderContentsModel,
+    OutboxEventsModel,
 )
 
 # this is the Alembic Config object, which provides

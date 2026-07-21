@@ -3,9 +3,9 @@ from uuid import UUID
 from sqlalchemy import (
     BIGINT,
     Boolean,
+    Float,
     ForeignKey,
     Index,
-    Integer,
     SmallInteger,
     String,
     UniqueConstraint,
@@ -158,27 +158,6 @@ class IngredientsModel(Base, UUIDv7Mixin):
     )
 
 
-class DishIngredientsModel(Base):
-    __tablename__ = "dish_ingredients"
-
-    dish_id: Mapped[UUID] = mapped_column(
-        Uuid, ForeignKey("dishes.id", ondelete="CASCADE"), primary_key=True, sort_order=1
-    )
-    ingredient_id: Mapped[UUID] = mapped_column(
-        Uuid,
-        ForeignKey("ingredients.id", ondelete="CASCADE"),
-        primary_key=True,
-        sort_order=2,
-    )
-
-    __table_args__ = (
-        Index(
-            "idx_dish_ingredient",
-            ingredient_id,
-        ),
-    )
-
-
 class WarehouseModel(Base):
     # !!! SET FILLFACTOR IN ALEMBIC SCRIPTS !!! --> 67%
     __tablename__ = "warehouse"
@@ -189,7 +168,7 @@ class WarehouseModel(Base):
         primary_key=True,
         sort_order=1,
     )
-    quantity: Mapped[int] = mapped_column(Integer, nullable=False, sort_order=2)
+    weight_g: Mapped[float] = mapped_column(Float, nullable=False, sort_order=2)
 
 
 class OrdersModel(Base, UUIDv7Mixin, TimestampMixin):

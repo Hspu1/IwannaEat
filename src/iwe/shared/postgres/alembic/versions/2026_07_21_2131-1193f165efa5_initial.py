@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: 8265c0846343
+Revision ID: 1193f165efa5
 Revises:
-Create Date: 2026-07-21 19:51:58.544950
+Create Date: 2026-07-21 21:31:29.435302
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '8265c0846343'
+revision: str = '1193f165efa5'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -37,6 +37,7 @@ def upgrade() -> None:
 
 
 
+
     op.create_table('ingredients',
     sa.Column('id', sa.Uuid(), nullable=False),
     sa.Column('name', sa.String(length=50), nullable=False),
@@ -44,6 +45,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index('uq_ingredients_name_lowercase', 'ingredients', [sa.literal_column('lower(name)')], unique=True, postgresql_where=sa.text('is_available IS true'))
+
 
 
 
@@ -57,21 +59,12 @@ def upgrade() -> None:
 
 
 
+
     op.create_table('users',
     sa.Column('id', sa.Uuid(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
 
-
-
-    op.create_table('dish_ingredients',
-    sa.Column('dish_id', sa.Uuid(), nullable=False),
-    sa.Column('ingredient_id', sa.Uuid(), nullable=False),
-    sa.ForeignKeyConstraint(['dish_id'], ['dishes.id'], ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['ingredient_id'], ['ingredients.id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('dish_id', 'ingredient_id')
-    )
-    op.create_index('idx_dish_ingredient', 'dish_ingredients', ['ingredient_id'], unique=False)
 
 
 
@@ -87,6 +80,7 @@ def upgrade() -> None:
     op.execute("ALTER TABLE orders SET (fillfactor = 88)")
 
 
+
     op.create_table('user_cards',
     sa.Column('id', sa.Uuid(), nullable=False),
     sa.Column('user_id', sa.Uuid(), nullable=False),
@@ -96,6 +90,7 @@ def upgrade() -> None:
     )
     op.create_index('uq_user_cards_seti_id', 'user_cards', ['seti_id'], unique=True)
     op.create_index('uq_user_cards_user_id', 'user_cards', ['user_id'], unique=True)
+
 
 
 
@@ -114,6 +109,7 @@ def upgrade() -> None:
     op.execute("ALTER TABLE wallet_top_ups SET (fillfactor = 88)")
 
 
+
     op.create_table('wallets',
     sa.Column('user_id', sa.Uuid(), nullable=False),
     sa.Column('balance', sa.BIGINT(), server_default=sa.text('0'), nullable=False),
@@ -124,13 +120,15 @@ def upgrade() -> None:
     op.execute("ALTER TABLE wallets SET (fillfactor = 76)")
 
 
+
     op.create_table('warehouse',
     sa.Column('ingredient_id', sa.Uuid(), nullable=False),
-    sa.Column('quantity', sa.Integer(), nullable=False),
+    sa.Column('weight_g', sa.Float(), nullable=False),
     sa.ForeignKeyConstraint(['ingredient_id'], ['ingredients.id'], ondelete='RESTRICT'),
     sa.PrimaryKeyConstraint('ingredient_id')
     )
     op.execute("ALTER TABLE warehouse SET (fillfactor = 67)")
+
 
 
     op.create_table('order_contents',
@@ -159,8 +157,6 @@ def downgrade() -> None:
     op.drop_table('user_cards')
     op.drop_index('idx_orders_user_active', table_name='orders', postgresql_where=sa.text('status IN (1, 2, 3)'))
     op.drop_table('orders')
-    op.drop_index('idx_dish_ingredient', table_name='dish_ingredients')
-    op.drop_table('dish_ingredients')
     op.drop_table('users')
     op.drop_table('outbox_events')
     op.drop_index('uq_ingredients_name_lowercase', table_name='ingredients', postgresql_where=sa.text('is_available IS true'))
