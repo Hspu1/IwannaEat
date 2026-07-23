@@ -51,12 +51,12 @@ class WalletsModel(Base):
         sort_order=1,
     )
 
-    balance: Mapped[int] = mapped_column(
+    balance_cents: Mapped[int] = mapped_column(
         BIGINT, nullable=False, default=0, server_default=text("0"), sort_order=2
-    )  # minor units
-    cashback_balance: Mapped[int] = mapped_column(
+    )
+    cashback_balance_cents: Mapped[int] = mapped_column(
         BIGINT, nullable=False, default=0, server_default=text("0"), sort_order=3
-    )  # minor units
+    )
 
 
 class UserCardsModel(Base, UUIDv7Mixin):
@@ -85,12 +85,8 @@ class WalletTopUpsModel(Base, UUIDv7Mixin, TimestampMixin):
         nullable=False,
         sort_order=1,
     )
-    idempotency_key: Mapped[UUID] = mapped_column(
-        Uuid, nullable=False, sort_order=2
-    )  # !!! from the client !!!
-    amount: Mapped[int] = mapped_column(
-        BIGINT, nullable=False, sort_order=3
-    )  # minor units
+    idempotency_key: Mapped[UUID] = mapped_column(Uuid, nullable=False, sort_order=2)
+    amount_cents: Mapped[int] = mapped_column(BIGINT, nullable=False, sort_order=3)
     status: Mapped[TopUpStatus] = mapped_column(
         SmallInteger,
         nullable=False,
@@ -181,11 +177,11 @@ class OrdersModel(Base, UUIDv7Mixin, TimestampMixin):
     user_id: Mapped[UUID] = mapped_column(
         Uuid, ForeignKey("users.id", ondelete="RESTRICT"), nullable=False, sort_order=1
     )
-    status: Mapped[OrderStatus] = mapped_column(
-        SmallInteger, nullable=False, sort_order=2
+    total_cost_cents: Mapped[int] = mapped_column(
+        BIGINT, nullable=False, default=0, server_default="0", sort_order=2
     )
-    total_cost_usd: Mapped[int] = mapped_column(
-        BIGINT, nullable=False, default=0, server_default="0", sort_order=3
+    status: Mapped[OrderStatus] = mapped_column(
+        SmallInteger, nullable=False, sort_order=3
     )
 
     __table_args__ = (
@@ -209,9 +205,7 @@ class OrderContentsModel(Base):
         Uuid, ForeignKey("dishes.id", ondelete="RESTRICT"), primary_key=True, sort_order=2
     )
 
-    price_usd: Mapped[int] = mapped_column(
-        Integer, nullable=False, sort_order=3
-    )  # minor units
+    price_cents: Mapped[int] = mapped_column(Integer, nullable=False, sort_order=3)
     qty: Mapped[int] = mapped_column(SmallInteger, nullable=False, sort_order=4)
 
 

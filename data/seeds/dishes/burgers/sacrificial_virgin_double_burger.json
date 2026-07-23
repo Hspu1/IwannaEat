@@ -1,6 +1,6 @@
 {
   "name": "Sacrificial Virgin Double Burger",
-  "price_usd_minor_units": 95499,
+  "price_cents": 95499,
   "meta": {
     "weight_g": 450.0,
     "is_vegan": false,
@@ -27,7 +27,6 @@
       "acrylamide_g": 0.0012
     }
   },
-
   "origin_and_recipe": {
     "origin_zone": "Serpent Country",
     "cooking_process": "Press the patty, add cayenne pepper. Grind believers to feed to doubters until architecture falls down behind me.",

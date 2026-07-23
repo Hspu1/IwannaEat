@@ -7,8 +7,8 @@ CHK_DISHES_ROOT_STRUCTURE_AND_TYPES: Final[CheckConstraint] = CheckConstraint(
         "(jsonb_typeof(info -> 'name') = 'string') AND "
         "(jsonb_typeof(info -> 'meta') = 'object') AND "
         "(jsonb_typeof(info -> 'origin_and_recipe') = 'object') AND "
-        "(jsonb_typeof(info -> 'price_usd_minor_units') = 'number') AND "
-        "((info ->> 'price_usd_minor_units')::numeric % 1 = 0)"
+        "(jsonb_typeof(info -> 'price_cents') = 'number') AND "
+        "((info ->> 'price_cents')::numeric % 1 = 0)"
     ),
     name="chk_dishes_root_structure_and_types",
 )
