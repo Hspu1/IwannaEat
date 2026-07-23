@@ -68,7 +68,7 @@ class UserCardsModel(Base, UUIDv7Mixin):
     seti_id: Mapped[str] = mapped_column(String(29), nullable=False, sort_order=2)
 
     __table_args__ = (
-        Index("uq_user_cards_user_id", user_id, unique=True),
+        Index("uq_user_cards_user_id", user_id, unique=True),  # single card per user
         Index("uq_user_cards_seti_id", seti_id, unique=True),
     )
 

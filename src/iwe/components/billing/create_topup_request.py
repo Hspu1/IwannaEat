@@ -41,7 +41,7 @@ class ResultMessages(StrEnum):
     SUCCESS = "success"
     NO_CARD_LAD = "no card lad"
     HOLD_THE_FUCK_UP = "hold the fuck up"
-    UNSUPPORTED_RESULT = "ya forgot to handle new msg"
+    UNSUPPORTED_RESULT = "ya forgot to handle smth"
     CONCURRENT_LOCK_TRY_AGAIN = "oopsie smth went wrong, try again"
 
 
@@ -118,6 +118,11 @@ async def create_topup_request(
         if driver_err.sqlstate == ErrCauseState.LOCK_NOT_AVAILABLE:
             return ResultMessages.CONCURRENT_LOCK_TRY_AGAIN
 
+        print(
+            f"DBAPIError unexpected shi in create_topup_request: {
+                driver_err.sqlstate, driver_err.constraint_name
+            }"
+        )
         raise err
 
     if not card_seti_id:
@@ -157,9 +162,14 @@ async def create_topup_request(
         ):
             return ResultMessages.HOLD_THE_FUCK_UP
 
+        print(
+            f"IntegrityError unexpected shi in create_topup_request: {
+                driver_err.sqlstate, driver_err.constraint_name
+            }"
+        )
         raise err
 
-    event_type = literal(OutboxEventType.HOLD_FUNDS_REQUESTED)
+    event_type = OutboxEventType.HOLD_FUNDS_REQUESTED
     payload = func.json_build_object(
         WalletTopUpsModel.user_id.name,
         user_id,

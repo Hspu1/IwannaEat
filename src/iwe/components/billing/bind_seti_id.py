@@ -31,7 +31,7 @@ class ResultMessages(StrEnum):
     USER_NOT_FOUND = "user not found"
     USER_ALREADY_EXISTS = "user already exists"
     SETI_ID_ALREADY_EXISTS = "seti-id already exists"
-    UNSUPPORTED_RESULT = "ya forgot to handle new msg"
+    UNSUPPORTED_RESULT = "ya forgot to handle smth"
 
 
 class ErrCauseState(StrEnum):
@@ -112,6 +112,11 @@ async def bind_seti_id(
                 return ResultMessages.SETI_ID_ALREADY_EXISTS
 
             case _:
+                print(
+                    f"IntegrityError unexpected shi in bind_seti_id: {
+                        driver_err.sqlstate, driver_err.constraint_name
+                    }"
+                )
                 raise err
 
     else:
