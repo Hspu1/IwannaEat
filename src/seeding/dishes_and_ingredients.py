@@ -9,9 +9,9 @@ from pydantic import AfterValidator, PostgresDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from uuid6 import uuid7
 
-from .dcl_statements import LOCK_TABLES_SQL
-from .ddl_statements import CREATE_STAGING_SQL
-from .dml_statements import (
+from .statements import (
+    CREATE_STAGING_SQL,
+    LOCK_TABLES_SQL,
     UPSERT_DISHES_SQL,
     UPSERT_INGREDIENTS_SQL,
     UPSERT_WAREHOUSE_SQL,
@@ -112,7 +112,7 @@ if __name__ == "__main__":
         if (err.sqlstate == "55P03") or ("could not obtain lock" in str(err).lower()):
             print("PG is busy currently")
         else:
-            print(f"Seed expected shi: {err} (sqlstate: {err.sqlstate})")
+            print(f"Seed expected shi: {err!r} (sqlstate: {err.sqlstate})")
 
     except Exception as err:
-        print(f"Seed unexpected shi: {err!r}?")
+        print(f"Seed unexpected shi: {err!r}")

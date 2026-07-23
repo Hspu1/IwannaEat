@@ -65,9 +65,9 @@ class PostgresManager(StrictSlots):
                 flush=True,
             )
 
-        except (SQLAlchemyError, TimeoutError, Exception) as e:
+        except (SQLAlchemyError, TimeoutError, Exception) as err:
             await self.disconnect()
-            raise PostgresNotReachableError from e
+            raise PostgresNotReachableError from err
 
     async def ping(self) -> None:
         if not self._engine or not self._session_maker:
