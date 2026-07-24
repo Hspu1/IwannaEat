@@ -133,25 +133,21 @@ async def create_topup_request(
     if not card_seti_id:
         return ResultMessages.NO_CARD_LAD
 
-    stmt_top_up = (
-        pg_insert(WalletTopUpsModel)
-        .from_select(
-            [
-                WalletTopUpsModel.user_id.name,
-                WalletTopUpsModel.idempotency_key.name,
-                WalletTopUpsModel.amount_cents.name,
-                WalletTopUpsModel.status.name,
-            ],
-            select(
-                literal(user_id),
-                literal(idempotency_key),
-                literal(amount_cents),
-                literal(TopUpStatus.PENDING),
-            )
-            .select_from(UserCardsModel)
-            .where(UserCardsModel.user_id == user_id),
+    stmt_top_up = pg_insert(WalletTopUpsModel).from_select(
+        [
+            WalletTopUpsModel.user_id.name,
+            WalletTopUpsModel.idempotency_key.name,
+            WalletTopUpsModel.amount_cents.name,
+            WalletTopUpsModel.status.name,
+        ],
+        select(
+            literal(user_id),
+            literal(idempotency_key),
+            literal(amount_cents),
+            literal(TopUpStatus.PENDING),
         )
-        .returning(WalletTopUpsModel.id)
+        .select_from(UserCardsModel)
+        .where(UserCardsModel.user_id == user_id),
     )
 
     try:
