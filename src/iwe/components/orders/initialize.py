@@ -63,7 +63,7 @@ async def get_order_id(session: AsyncSession, user_id: UUID) -> UUID | ResultMes
         .values(user_id=user_id, status=OrderStatus.CREATED)
         .on_conflict_do_update(
             index_elements=[OrdersModel.user_id],
-            index_where=text("status = 1"),
+            index_where=text("status = 1"),  # OrderStatus.CREATED
             set_={"status": OrdersModel.status},
         )
         .returning(OrdersModel.id)

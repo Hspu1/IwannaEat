@@ -30,6 +30,7 @@ from .enums import OrderStatus, OutboxEventType, TopUpStatus
 from .mixins import TimestampMixin, UUIDv7Mixin
 
 # op.execute("ALTER TABLE orders SET (fillfactor = 88)")
+# op.execute("ALTER TABLE user_cards SET (fillfactor = 92)")
 # op.execute("ALTER TABLE wallet_top_ups SET (fillfactor = 88)")
 # op.execute("ALTER TABLE wallets SET (fillfactor = 76)")
 # op.execute("ALTER TABLE warehouse SET (fillfactor = 67)")
@@ -60,6 +61,7 @@ class WalletsModel(Base):
 
 
 class UserCardsModel(Base, UUIDv7Mixin):
+    # !!! SET FILLFACTOR IN ALEMBIC SCRIPTS !!! --> 92%
     __tablename__ = "user_cards"
 
     user_id: Mapped[UUID] = mapped_column(
@@ -67,11 +69,21 @@ class UserCardsModel(Base, UUIDv7Mixin):
         ForeignKey("users.id", ondelete="RESTRICT"),
         sort_order=1,
     )
-    seti_id: Mapped[str] = mapped_column(String(29), nullable=False, sort_order=2)
+    is_default: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="false", sort_order=2
+    )
+    card_last4: Mapped[str] = mapped_column(String(4), nullable=False, sort_order=3)
+    card_brand: Mapped[str] = mapped_column(String(20), nullable=False, sort_order=4)
+    seti_id: Mapped[str] = mapped_column(String(29), nullable=False, sort_order=5)
 
     __table_args__ = (
-        Index("uq_user_cards_user_id", user_id, unique=True),  # single card per user
         Index("uq_user_cards_seti_id", seti_id, unique=True),
+        Index(
+            "uq_user_cards_user_default_card",
+            user_id,
+            unique=True,
+            postgresql_where=is_default.is_(True),
+        ),
     )
 
 
@@ -190,6 +202,12 @@ class OrdersModel(Base, UUIDv7Mixin, TimestampMixin):
             user_id,
             postgresql_where=status.in_([1, 2, 3]),
             # 1 --> CREATED; 2 --> COOKING; 3 --> DELIVERING
+        ),
+        Index(
+            "idx_orders_user_creating_uniq",
+            user_id,
+            unique=True,
+            postgresql_where=(status == 1),  # only one draft order per user
         ),
     )
 

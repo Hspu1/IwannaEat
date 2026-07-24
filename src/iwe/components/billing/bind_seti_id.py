@@ -3,6 +3,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Response, status
 from pydantic import BaseModel, Field
+from sqlalchemy import exists, select, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,10 +17,10 @@ from iwe.shared.postgres.schema import UserCardsModel
 
 class BindRequest(BaseModel):
     user_id: UUID
-    seti_id: str = Field(
-        description="Stripe SetupIntent ID",
-        pattern=r"^seti_[a-zA-Z0-9]{24}$",
-    )
+    seti_id: str = Field(pattern=r"^seti_[a-zA-Z0-9]{24}$")
+    card_brand: str = Field(min_length=3, max_length=20)
+    card_last4: str = Field(pattern=r"^\d{4}$")
+    make_default: bool
 
 
 #######################################################################################
@@ -29,8 +30,8 @@ class BindRequest(BaseModel):
 class ResultMessages(StrEnum):
     SUCCESS = "success"
     USER_NOT_FOUND = "user not found"
-    USER_ALREADY_EXISTS = "user already exists"
-    SETI_ID_ALREADY_EXISTS = "seti-id already exists"
+    THIS_CARD_ALRDY_BOUND = "this card alrdy bound"
+    USER_ALRDY_HAS_DEFAULT_CARD = "user alrdy has a default card"
     UNSUPPORTED_RESULT = "ya forgot to handle smth"
 
 
@@ -41,8 +42,8 @@ class ErrCauseState(StrEnum):
 
 class ErrCauseConstraint(StrEnum):
     USER_CARDS_USER_ID_FK = "user_cards_user_id_fkey"
-    UQ_USER_CARDS_USER_ID = "uq_user_cards_user_id"
     UQ_USER_CARDS_SETI_ID = "uq_user_cards_seti_id"
+    UQ_USER_CARDS_USER_DEFAULT_CARD = "uq_user_cards_user_default_card"
 
 
 #######################################################################################
@@ -54,21 +55,29 @@ router = APIRouter(prefix="/bind")
 @router.post("/seti-id")
 async def bind_setup_intent(request: BindRequest, response: Response) -> ResultMessages:
     async with pg_session() as session:
-        verdict = await bind_seti_id(
-            session=session, user_id=request.user_id, seti_id=request.seti_id
+        verdict = await manage_card(
+            session=session,
+            user_id=request.user_id,
+            seti_id=request.seti_id,
+            card_brand=request.card_brand,
+            card_last4=request.card_last4,
+            make_default=request.make_default,
         )
 
     match verdict:
+        case ResultMessages.SUCCESS:
+            response.status_code = status.HTTP_201_CREATED
+            return verdict
+
         case ResultMessages.USER_NOT_FOUND:
             response.status_code = status.HTTP_404_NOT_FOUND
             return verdict
 
-        case ResultMessages.USER_ALREADY_EXISTS | ResultMessages.SETI_ID_ALREADY_EXISTS:
+        case (
+            ResultMessages.THIS_CARD_ALRDY_BOUND
+            | ResultMessages.USER_ALRDY_HAS_DEFAULT_CARD
+        ):
             response.status_code = status.HTTP_409_CONFLICT
-            return verdict
-
-        case ResultMessages.SUCCESS:
-            response.status_code = status.HTTP_201_CREATED
             return verdict
 
         case _:
@@ -80,10 +89,39 @@ async def bind_setup_intent(request: BindRequest, response: Response) -> ResultM
 #######################################################################################
 
 
-async def bind_seti_id(
-    session: AsyncSession, user_id: UUID, seti_id: str
+async def manage_card(  # noqa PLR0913
+    session: AsyncSession,
+    user_id: UUID,
+    seti_id: str,
+    card_brand: str,
+    card_last4: str,
+    make_default: bool,
 ) -> ResultMessages:
-    stmt = pg_insert(UserCardsModel).values(user_id=user_id, seti_id=seti_id)
+
+    if make_default:
+        await session.execute(
+            update(UserCardsModel)
+            .where(
+                UserCardsModel.user_id == user_id,
+                UserCardsModel.is_default.is_(True),
+            )
+            .values(is_default=False)
+        )
+    else:
+        has_cards = await session.execute(
+            select(exists().where(UserCardsModel.user_id == user_id))
+        )
+        if not has_cards.scalar_one():
+            make_default = True
+
+    stmt = pg_insert(UserCardsModel).values(
+        user_id=user_id,
+        seti_id=seti_id,
+        card_brand=card_brand,
+        card_last4=card_last4,
+        is_default=make_default,
+    )
+
     try:
         await session.execute(stmt)
 
@@ -99,17 +137,19 @@ async def bind_seti_id(
 
             case (
                 ErrCauseState.DUPLICATE_KEY,
-                ErrCauseConstraint.UQ_USER_CARDS_USER_ID,
+                ErrCauseConstraint.UQ_USER_CARDS_SETI_ID,
             ):
-                return ResultMessages.USER_ALREADY_EXISTS
+                # also triggers when 23503 (user not found) and 23505 on seti-id
+                # and
+                # also triggers when 23505 fires
+                # for both user_id and seti_id simultaneously
+                return ResultMessages.THIS_CARD_ALRDY_BOUND
 
             case (
                 ErrCauseState.DUPLICATE_KEY,
-                ErrCauseConstraint.UQ_USER_CARDS_SETI_ID,
+                ErrCauseConstraint.UQ_USER_CARDS_USER_DEFAULT_CARD,
             ):
-                # also triggers when 23505 fires
-                # for both user_id and seti_id simultaneously
-                return ResultMessages.SETI_ID_ALREADY_EXISTS
+                return ResultMessages.USER_ALRDY_HAS_DEFAULT_CARD
 
             case _:
                 print(

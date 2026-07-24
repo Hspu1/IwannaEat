@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: b1082aecdec6
+Revision ID: fb5c31ff82b8
 Revises:
-Create Date: 2026-07-24 14:23:51.051472
+Create Date: 2026-07-24 17:08:51.697786
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = 'b1082aecdec6'
+revision: str = 'fb5c31ff82b8'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -86,13 +86,16 @@ def upgrade() -> None:
     op.create_table('user_cards',
     sa.Column('id', sa.Uuid(), nullable=False),
     sa.Column('user_id', sa.Uuid(), nullable=False),
+    sa.Column('is_default', sa.Boolean(), server_default='false', nullable=False),
+    sa.Column('card_last4', sa.String(length=4), nullable=False),
+    sa.Column('card_brand', sa.String(length=20), nullable=False),
     sa.Column('seti_id', sa.String(length=29), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='RESTRICT'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index('uq_user_cards_seti_id', 'user_cards', ['seti_id'], unique=True)
-    op.create_index('uq_user_cards_user_id', 'user_cards', ['user_id'], unique=True)
-
+    op.create_index('uq_user_cards_user_default_card', 'user_cards', ['user_id'], unique=True, postgresql_where=sa.text('is_default IS true'))
+    op.execute("ALTER TABLE user_cards SET (fillfactor = 92)")
 
 
 
@@ -133,6 +136,7 @@ def upgrade() -> None:
 
 
 
+
     op.create_table('order_contents',
     sa.Column('order_id', sa.Uuid(), nullable=False),
     sa.Column('dish_id', sa.Uuid(), nullable=False),
@@ -154,7 +158,7 @@ def downgrade() -> None:
     op.drop_table('wallets')
     op.drop_index('idx_wallet_top_ups_cleanup', table_name='wallet_top_ups', postgresql_where=sa.text('status = 1'))
     op.drop_table('wallet_top_ups')
-    op.drop_index('uq_user_cards_user_id', table_name='user_cards')
+    op.drop_index('uq_user_cards_user_default_card', table_name='user_cards', postgresql_where=sa.text('is_default IS true'))
     op.drop_index('uq_user_cards_seti_id', table_name='user_cards')
     op.drop_table('user_cards')
     op.drop_index('idx_orders_user_creating_uniq', table_name='orders', postgresql_where=sa.text('status = 1'))

@@ -23,13 +23,10 @@ from iwe.shared.postgres.schema import (
 
 
 class TopUpRequest(BaseModel):
-    """should be order_id instead of amount acshually"""
+    """should be order_id instead of amount_cents acshually"""
 
     user_id: UUID
-    amount: int = Field(
-        ge=5000,
-        description="Amount in minor units (789.99 --> 78999)",
-    )
+    amount_cents: int = Field(ge=5000)
     idempotency_key: UUID
 
 
@@ -68,11 +65,15 @@ async def create_request(request: TopUpRequest, response: Response) -> ResultMes
         verdict = await create_topup_request(
             session=session,
             user_id=request.user_id,
-            amount=request.amount,
+            amount_cents=request.amount_cents,
             idempotency_key=request.idempotency_key,
         )
 
     match verdict:
+        case ResultMessages.SUCCESS:
+            response.status_code = status.HTTP_201_CREATED
+            return verdict
+
         case ResultMessages.CONCURRENT_LOCK_TRY_AGAIN:
             response.status_code = status.HTTP_409_CONFLICT
             return verdict
@@ -86,10 +87,6 @@ async def create_request(request: TopUpRequest, response: Response) -> ResultMes
             response.status_code = status.HTTP_202_ACCEPTED
             return verdict
 
-        case ResultMessages.SUCCESS:
-            response.status_code = status.HTTP_201_CREATED
-            return verdict
-
         case _:
             response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
             return ResultMessages.UNSUPPORTED_RESULT  # for debugging
@@ -100,7 +97,7 @@ async def create_request(request: TopUpRequest, response: Response) -> ResultMes
 
 
 async def create_topup_request(
-    session: AsyncSession, user_id: UUID, amount: int, idempotency_key: UUID
+    session: AsyncSession, user_id: UUID, amount_cents: int, idempotency_key: UUID
 ) -> ResultMessages:
 
     stmt_lock_card = (
@@ -134,13 +131,13 @@ async def create_topup_request(
             [
                 WalletTopUpsModel.user_id.name,
                 WalletTopUpsModel.idempotency_key.name,
-                WalletTopUpsModel.amount.name,
+                WalletTopUpsModel.amount_cents.name,
                 WalletTopUpsModel.status.name,
             ],
             select(
                 literal(user_id),
                 literal(idempotency_key),
-                literal(amount),
+                literal(amount_cents),
                 literal(TopUpStatus.PENDING),
             )
             .select_from(UserCardsModel)
@@ -173,8 +170,8 @@ async def create_topup_request(
     payload = func.json_build_object(
         WalletTopUpsModel.user_id.name,
         user_id,
-        WalletTopUpsModel.amount.name,
-        amount,
+        WalletTopUpsModel.amount_cents.name,
+        amount_cents,
         UserCardsModel.seti_id.name,
         card_seti_id,
         WalletTopUpsModel.idempotency_key.name,
