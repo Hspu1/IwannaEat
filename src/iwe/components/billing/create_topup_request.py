@@ -72,24 +72,34 @@ async def create_request(request: TopUpRequest, response: Response) -> ResultMes
     match verdict:
         case ResultMessages.SUCCESS:
             response.status_code = status.HTTP_201_CREATED
-            return verdict
+            return {
+                "verdict": verdict,
+            }
 
         case ResultMessages.CONCURRENT_LOCK_TRY_AGAIN:
             response.status_code = status.HTTP_409_CONFLICT
-            return verdict
+            return {
+                "verdict": verdict,
+            }
 
         case ResultMessages.NO_CARD_LAD:
             # also triggers when the user is missing
             response.status_code = status.HTTP_422_UNPROCESSABLE_CONTENT
-            return verdict
+            return {
+                "verdict": verdict,
+            }
 
         case ResultMessages.HOLD_THE_FUCK_UP:
             response.status_code = status.HTTP_202_ACCEPTED
-            return verdict
+            return {
+                "verdict": verdict,
+            }
 
         case _:
             response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-            return ResultMessages.UNSUPPORTED_RESULT  # for debugging
+            return {
+                "huh": ResultMessages.UNSUPPORTED_RESULT,
+            }  # for debugging
 
 
 #######################################################################################

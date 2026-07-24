@@ -49,11 +49,14 @@ class ErrCauseConstraint(StrEnum):
 #######################################################################################
 #######################################################################################
 
-router = APIRouter(prefix="/bind")
+router = APIRouter()
 
 
-@router.post("/seti-id")
-async def bind_setup_intent(request: BindRequest, response: Response) -> ResultMessages:
+@router.post("/bind-card")
+async def bind_setup_intent(
+    request: BindRequest, response: Response
+) -> dict[str, ResultMessages]:
+
     async with pg_session() as session:
         verdict = await manage_card(
             session=session,
@@ -67,22 +70,30 @@ async def bind_setup_intent(request: BindRequest, response: Response) -> ResultM
     match verdict:
         case ResultMessages.SUCCESS:
             response.status_code = status.HTTP_201_CREATED
-            return verdict
+            return {
+                "verdict": verdict,
+            }
 
         case ResultMessages.USER_NOT_FOUND:
             response.status_code = status.HTTP_404_NOT_FOUND
-            return verdict
+            return {
+                "verdict": verdict,
+            }
 
         case (
             ResultMessages.THIS_CARD_ALRDY_BOUND
             | ResultMessages.USER_ALRDY_HAS_DEFAULT_CARD
         ):
             response.status_code = status.HTTP_409_CONFLICT
-            return verdict
+            return {
+                "verdict": verdict,
+            }
 
         case _:
             response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-            return ResultMessages.UNSUPPORTED_RESULT  # for debugging
+            return {
+                "huh": ResultMessages.UNSUPPORTED_RESULT,
+            }  # for debugging
 
 
 #######################################################################################

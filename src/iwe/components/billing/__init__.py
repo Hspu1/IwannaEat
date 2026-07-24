@@ -3,12 +3,15 @@ from fastapi import APIRouter
 from .bind_seti_id import router as bind_seti_id
 from .create_topup_request import router as create_topup_request
 from .generate_seti_id import router as generate_seti_id
+from .get_cards import router as get_cards
 
 billing_router = APIRouter(prefix="/billing", tags=["billing"])
 service_router = APIRouter(prefix="/service", tags=["service"])
 
 billing_router.include_router(bind_seti_id)
 billing_router.include_router(create_topup_request)
+billing_router.include_router(get_cards)
+
 service_router.include_router(generate_seti_id)
 
 

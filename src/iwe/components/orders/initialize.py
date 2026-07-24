@@ -35,22 +35,31 @@ router = APIRouter()
 
 
 @router.post("/initialize")
-async def initialize_order(user_id: UUID, response: Response) -> UUID | ResultMessages:
+async def initialize_order(
+    user_id: UUID, response: Response
+) -> dict[str, UUID | ResultMessages]:
+
     async with pg_session() as session:
         verdict = await get_order_id(session=session, user_id=user_id)
 
     match verdict:
         case UUID() as order_id:
             response.status_code = status.HTTP_201_CREATED
-            return order_id
+            return {
+                "order_id": order_id,
+            }
 
         case ResultMessages.USER_NOT_FOUND:
             response.status_code = status.HTTP_404_NOT_FOUND
-            return verdict
+            return {
+                "verdict": verdict,
+            }
 
         case _:
             response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-            return ResultMessages.UNSUPPORTED_RESULT  # for debugging
+            return {
+                "huh": ResultMessages.UNSUPPORTED_RESULT,
+            }  # for debugging
 
 
 #######################################################################################

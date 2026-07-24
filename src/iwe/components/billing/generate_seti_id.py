@@ -2,6 +2,10 @@ from fastapi import APIRouter, status
 
 from iwe.core.dependencies import stripe_client
 
+#######################################################################################
+#######################################################################################
+
+
 router = APIRouter(prefix="/generate")
 
 

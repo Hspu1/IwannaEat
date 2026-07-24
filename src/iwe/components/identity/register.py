@@ -7,16 +7,20 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from iwe.core.dependencies import pg_session
 from iwe.shared.postgres.schema import UsersModel, WalletsModel
 
+#######################################################################################
+#######################################################################################
+
+
 router = APIRouter()
 
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
-async def register() -> dict[str, str]:
+async def register() -> dict[str, UUID]:
     async with pg_session() as session:
         user_id: UUID = await create_user_with_wallet(session=session)
 
     return {
-        "user_id": str(user_id),
+        "user_id": user_id,
     }
 
 

@@ -29,7 +29,6 @@ async def pg_ro_session() -> AsyncIterator[AsyncSession]:
 
     session_maker = pg_manager.get_session_maker()
     async with session_maker() as session:
-        session.execution_options(postgresql_readonly=True)
         yield session
 
 

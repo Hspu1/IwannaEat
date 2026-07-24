@@ -1,0 +1,48 @@
+from uuid import UUID
+
+from fastapi import APIRouter, status
+from pydantic import BaseModel
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from iwe.core.dependencies import pg_ro_session
+from iwe.shared.postgres.schema import UserCardsModel
+
+#######################################################################################
+#######################################################################################
+
+
+class UserCardSchema(BaseModel):
+    user_id: UUID
+    is_default: bool
+    card_last4: str
+    card_brand: str
+    seti_id: str
+
+
+#######################################################################################
+#######################################################################################
+
+
+router = APIRouter()
+
+
+@router.get("/cards", status_code=status.HTTP_200_OK)
+async def get_cards(user_id: UUID) -> dict[str, list[UserCardSchema]]:
+    async with pg_ro_session() as session:
+        cards = await get_all_cards(session=session, user_id=user_id)
+
+    return {
+        "cards": cards,
+    }
+
+
+#######################################################################################
+#######################################################################################
+
+
+async def get_all_cards(session: AsyncSession, user_id: UUID) -> list[UserCardsModel]:
+    result = await session.execute(
+        select(UserCardsModel).where(UserCardsModel.user_id == user_id)
+    )
+    return result.scalars().all()
