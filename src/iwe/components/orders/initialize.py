@@ -2,6 +2,7 @@ from enum import StrEnum
 from uuid import UUID
 
 from fastapi import APIRouter, Response, status
+from sqlalchemy import text
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -60,6 +61,11 @@ async def get_order_id(session: AsyncSession, user_id: UUID) -> UUID | ResultMes
     raw_order_id = (
         pg_insert(OrdersModel)
         .values(user_id=user_id, status=OrderStatus.CREATED)
+        .on_conflict_do_update(
+            index_elements=[OrdersModel.user_id],
+            index_where=text("status = 1"),
+            set_={"status": OrdersModel.status},
+        )
         .returning(OrdersModel.id)
     )
     try:

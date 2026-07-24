@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: e7c03a0ad791
+Revision ID: b1082aecdec6
 Revises:
-Create Date: 2026-07-23 22:55:12.706073
+Create Date: 2026-07-24 14:23:51.051472
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = 'e7c03a0ad791'
+revision: str = 'b1082aecdec6'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -78,6 +78,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index('idx_orders_user_active', 'orders', ['user_id'], unique=False, postgresql_where=sa.text('status IN (1, 2, 3)'))
+    op.create_index('idx_orders_user_creating_uniq', 'orders', ['user_id'], unique=True, postgresql_where=sa.text('status = 1'))
     op.execute("ALTER TABLE orders SET (fillfactor = 88)")
 
 
@@ -156,6 +157,7 @@ def downgrade() -> None:
     op.drop_index('uq_user_cards_user_id', table_name='user_cards')
     op.drop_index('uq_user_cards_seti_id', table_name='user_cards')
     op.drop_table('user_cards')
+    op.drop_index('idx_orders_user_creating_uniq', table_name='orders', postgresql_where=sa.text('status = 1'))
     op.drop_index('idx_orders_user_active', table_name='orders', postgresql_where=sa.text('status IN (1, 2, 3)'))
     op.drop_table('orders')
     op.drop_table('users')
